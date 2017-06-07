@@ -1,3 +1,4 @@
+#
 # -*- coding: utf-8 -*-
 """
 Created on Wed Feb  8 09:44:45 2017
@@ -52,7 +53,7 @@ class RemoteDock():
             roslaunchfile (str) : the specific ros file to be run
             
         Example:
-            >>> import RefactoredRemoteAccessScript
+            >>> import remote_access_base
             >>> obj = remlib.RemoteDock(image, ip, port, roscommand, rospackage, roslaunchfile)
         ..  >>> obj.startcheck()
     """
@@ -80,13 +81,13 @@ class RemoteDock():
         tmpfile = open(pathtmpfile, "r")
         img_nm = tmpfile.read()
         img_nm = img_nm[1:-2]
-        print img_nm
+        print(img_nm)
         os.remove(pathtmpfile)
         var = md5checksum(self.image, img_nm)
         return var
     
     
-    def createDockerImage(self):
+    def create_docker_image(self):
         """
         Compiles a baseDocker image with specific image of a rospackage and 
         deploys the built image on the server
@@ -137,7 +138,7 @@ class RemoteDock():
         return status
     
     
-    def createDockerContainer(self):
+    def create_docker_container(self):
         """
         Creates a Docker container and uses the image built from function 
         createDockerImg and deploys it directly on the server
@@ -159,7 +160,7 @@ class RemoteDock():
         return container['Id']
     
         
-    def runDockerCommands(self):
+    def run_docker_commands(self):
         """
         Runs the created docker container using the generated container id 
         from createDockerContainer function
@@ -174,7 +175,7 @@ class RemoteDock():
         subprocess.call(dockerexec_source,shell=True)
     
       
-    def runExistingImage(self):
+    def run_existing_image(self):
         """
         Runs the existing image in the local machine on the robot
         """
