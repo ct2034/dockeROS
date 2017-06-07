@@ -23,24 +23,39 @@ class MltThrd(threading.Thread):
     def run(self):
         # execute the command, queue the result
         subprocess.call(self.cmd, shell=True)
-        # (status, output) = commands.getstatusoutput(self.cmd)
-        # self.queue.put((self.cmd, output, status))
 
-
-'''
-MD5 checksum function for comparing input image name and existing image names
-'''
 def md5checksum(str1, str2):
+    """
+        Compares two input strings and returns true or false after running
+        md5 checksum algorithm
+        Args:
+            str1 (str): 1st string
+            str1 (str): 2nd string      
+    """
     m1 = md5.new()
     m2 = md5.new()
     m1.update(str1)
     m2.update(str2)
-    if (m1.digest() == m2.digest()):
-        return True
-    else:
-        return False
+    return m1.digest() == m2.digest()
 
 class RemoteDock():
+    """
+        Remotely deploys a docker container with a user specified image of a 
+        rospackage
+        Args:
+            image (str): the image is created with user input + '_dockerfile'
+            ip (str): IP address of the robot on which the container should run
+            port (str): Port on which docker demon is running, check from robot
+            roscommand (str): e.g. roslaunch or rosrun based on type of ros 
+            package file
+            rospackage (str): the user specified rospackage which should run
+            roslaunchfile (str) : the specific ros file to be run
+            
+        Example:
+            >>> import RefactoredRemoteAccessScript
+            >>> obj = remlib.RemoteDock(image, ip, port, roscommand, rospackage, roslaunchfile)
+        ..  >>> obj.startcheck()
+    """
     
     def __init__(self, image, ip, port, roscommand, rospackage, roslaunchfile):
         self.ip = ip
@@ -54,6 +69,10 @@ class RemoteDock():
         self.container_id = ""
         
     def startcheck(self):
+        """
+        Creates an image name based on the rospackage user wants to run
+        and checks whether a similar image exists or not
+        """
         dockercmd_getimages = "curl -v http://" + self.ip + ":" + self.port +\
         "/images/search?term=" + self.image + " | jq '.[] | .name' >> tmpfile"
         subprocess.call(dockercmd_getimages, shell=True)
@@ -61,15 +80,17 @@ class RemoteDock():
         tmpfile = open(pathtmpfile, "r")
         img_nm = tmpfile.read()
         img_nm = img_nm[1:-2]
+        print img_nm
         os.remove(pathtmpfile)
         var = md5checksum(self.image, img_nm)
         return var
     
-    '''
-    Takes in the the ip + port number and rospackage name
-    Deploys the built image on the server
-    '''
+    
     def createDockerImage(self):
+        """
+        Compiles a baseDocker image with specific image of a rospackage and 
+        deploys the built image on the server
+        """
         # reading base docker commands
         copysh_path = os.path.abspath("basedocker") + "/ros_entrypoint.sh"
         base_path = os.path.abspath("basedocker") + "/Dockerfile"
@@ -91,6 +112,7 @@ class RemoteDock():
         tmp_contents = dock_read.readlines()
         dock_read.close()
         idx = 9
+        
         for i in range(len(tmp_contents)):
             contents.insert(idx, tmp_contents[i])
             idx = idx + 1
@@ -114,11 +136,12 @@ class RemoteDock():
         status = subprocess.call(buildcode, shell=True)
         return status
     
-    '''
-    Creates a Docker container and uses the image built from function 
-    createDockerImg and deploys it directly on the server
-    '''
+    
     def createDockerContainer(self):
+        """
+        Creates a Docker container and uses the image built from function 
+        createDockerImg and deploys it directly on the server
+        """
         cli = docker.Client(base_url=self.ip_str)
         container = cli.create_container(self.image,
                                          hostname='3e93a4b05cf6',
@@ -135,11 +158,12 @@ class RemoteDock():
         self.container_id = container['Id']
         return container['Id']
     
-    '''
-    Runs the created docker container using the generated container id 
-    from createDockerContainer function
-    '''    
+        
     def runDockerCommands(self):
+        """
+        Runs the created docker container using the generated container id 
+        from createDockerContainer function
+        """
         cli = docker.Client(base_url=self.ip_str)
         rosip_str = cli.inspect_container(self.container_id)['NetworkSettings']['IPAddress']
         dockerexec_source = "docker -H tcp://" + self.ip + ":" + \
@@ -149,10 +173,11 @@ class RemoteDock():
         + self.roslaunchfile
         subprocess.call(dockerexec_source,shell=True)
     
-    '''
-    Runs the existing image in the local machine on the robot
-    '''  
+      
     def runExistingImage(self):
+        """
+        Runs the existing image in the local machine on the robot
+        """
         dockercmd_runimg = "docker -H tcp://" + self.ip + ":" + self.port + " run -it --rm -u " + \
                             '"$(id -u):$(id -g)" ' + \
                             "-v $HOME/.ros:/.ros -v $HOME/.config/catkin:/.config/catkin:ro " + \
