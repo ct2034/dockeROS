@@ -8,7 +8,7 @@ Created on Wed Feb  8 09:44:45 2017
 import os
 import subprocess
 import threading
-import md5
+import hashlib
 import docker
 import shutil
 
@@ -32,8 +32,8 @@ def md5checksum(str1, str2):
             str1 (str): 1st string
             str1 (str): 2nd string      
     """
-    m1 = md5.new()
-    m2 = md5.new()
+    m1 = hashlib.md5()
+    m2 = hashlib.md5()
     m1.update(str1)
     m2.update(str2)
     return m1.digest() == m2.digest()

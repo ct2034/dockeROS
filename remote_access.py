@@ -8,6 +8,14 @@ Created on Wed Feb  8 09:44:45 2017
 import subprocess
 import sys
 import remote_access_base
+import logging
+
+logging.getLogger('root').setLevel(logging.DEBUG)
+if logging.getLogger('root').getEffectiveLevel() == logging.DEBUG:
+    from debug_print import debug_eval_print
+else:
+    def debug_eval_print(_):
+        pass
 
 usage = "USAGE:\n" + \
         "," * 80 + "\n" \
@@ -24,6 +32,8 @@ try:
     ipwhl = sys.argv[1]
     ip = ipwhl.split(':')[0]
     port = ipwhl.split(':')[1]
+    debug_eval_print('ip')
+    debug_eval_print('port')
 except:
     print(usage)
     print("IP address not entered! exiting script")
@@ -31,6 +41,7 @@ except:
 
 try:
     roscommand = sys.argv[2]
+    debug_eval_print('roscommand')
 except:
     print(usage)
     print("Ros command not entered! exiting script")
@@ -38,6 +49,7 @@ except:
 
 try:
     rospackage = sys.argv[3]
+    debug_eval_print('rospackage')
 except:
     print(usage)
     print("Ros package name not entered! exiting script")
@@ -45,6 +57,7 @@ except:
 
 try:
     roslaunchfile = sys.argv[4]
+    debug_eval_print('roslaunchfile')
 except:
     print(usage)
     print("Ros launch file name not entered! exiting script")
