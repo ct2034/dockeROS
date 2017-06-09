@@ -24,7 +24,7 @@ class MltThrd(threading.Thread):
         # execute the command, queue the result
         subprocess.call(self.cmd, shell=True)
 
-def md5checksum(str1, str2):
+def md5compare(str1, str2):
     """
         Compares two input strings and returns true or false after running
         md5 checksum algorithm
@@ -63,26 +63,22 @@ class RemoteDock():
         self.roscommand = roscommand
         self.rospackage = rospackage
         self.roslaunchfile = roslaunchfile
-        self.rospackage = rospackage
-        self.image = rospackage + "_dockerfile"
         self.ip_str = "tcp://" + self.ip + ":" + self.port
-        self.container_id = ""
+        self.docker_client = docker.DockerClient(self.ip_str)
+
+    def get_image_name(self):
+        return '_'.join([self.roscommand, self.rospackage, self.roslaunchfile])  # TODO: hash of directory?
         
     def startcheck(self):
         """
         Creates an image name based on the rospackage user wants to run
         and checks whether a similar image exists or not
         """
-        dockercmd_getimages = "curl -v http://" + self.ip + ":" + self.port +\
-        "/images/search?term=" + self.image + " | jq '.[] | .name' >> tmpfile"
-        subprocess.call(dockercmd_getimages, shell=True)
-        pathtmpfile = os.path.abspath("tmpfile")
-        tmpfile = open(pathtmpfile, "r")
-        img_nm = tmpfile.read()
-        img_nm = img_nm[1:-2]
-        print(img_nm)
-        os.remove(pathtmpfile)
-        var = md5checksum(self.image, img_nm)
+        images = self.docker_client.images.list()
+        print("Currently available images:")
+        print(images)
+
+        var = md5compare(self.image, img_nm)
         return var
     
     

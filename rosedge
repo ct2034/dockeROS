@@ -1,2 +1,2 @@
 #!/bin/bash
-python2 remote_access.py $@
+python2 src/remote_access.py $@
