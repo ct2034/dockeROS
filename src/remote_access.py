@@ -66,14 +66,13 @@ except:
 dockercmd_img = "docker -H tcp://" + ipwhl + " images"
 subprocess.call(dockercmd_img, shell=True)
 
-image = rospackage + "_dockerfile"
-dock_obj = remote_access_base.RemoteDock(image, ip, port, roscommand, rospackage, roslaunchfile)
-var = dock_obj.startcheck()
-if var:
+dock_obj = remote_access_base.RemoteDock(ip, port,
+                                         ' '.join([roscommand, rospackage, roslaunchfile]),
+                                         ca_cert='/home/cch/.docker/ca.pem')
+if not dock_obj.does_exist_on_client():
     dock_obj.create_docker_image()
     dock_obj.create_docker_container()
     dock_obj.run_docker_commands()
-    
 else:
     dock_obj.run_existing_image()
 

@@ -6,12 +6,16 @@ Created on Wed Feb  8 09:44:45 2017
 """
 
 import os
+import socket
 import subprocess
 import threading
 import hashlib
 import docker
 import shutil
+from os import path
 
+import logging
+import rospkg
 
 
 class MltThrd(threading.Thread):
@@ -24,7 +28,7 @@ class MltThrd(threading.Thread):
         # execute the command, queue the result
         subprocess.call(self.cmd, shell=True)
 
-def md5compare(str1, str2):
+def compare(str1, str2):
     """
         Compares two input strings and returns true or false after running
         md5 checksum algorithm
@@ -37,6 +41,40 @@ def md5compare(str1, str2):
     m1.update(str1)
     m2.update(str2)
     return m1.digest() == m2.digest()
+
+def path_checksum(this_path):
+    """
+    Recursively calculates a checksum representing the contents of all files
+    found with a sequence of file and/or directory paths.
+    Source: https://code.activestate.com/recipes/576973-getting-the-sha-1-or-md5-hash-of-a-directory/#c3
+
+    """
+    paths = [this_path]
+    if not hasattr(paths, '__iter__'):
+        raise TypeError('sequence or iterable expected not %r!' % type(paths))
+
+    def _update_checksum(checksum, dirname, filenames):
+        for filename in sorted(filenames):
+            this_path = path.join(dirname, filename)
+            if path.isfile(this_path):
+                logging.debug(path)
+                fh = open(this_path, 'rb')
+                while 1:
+                    buf = fh.read(4096)
+                    if not buf: break
+                    checksum.update(buf)
+                fh.close()
+
+    chksum = hashlib.sha1()
+
+    for p in sorted([path.normpath(f) for f in paths]):
+        if path.exists(p):
+            if path.isdir(p):
+                path.walk(p, _update_checksum, chksum)
+            elif path.isfile(path):
+                _update_checksum(chksum, path.dirname(path), path.basename(path))
+
+    return chksum.hexdigest()
 
 class RemoteDock():
     """
@@ -53,33 +91,45 @@ class RemoteDock():
             
         Example:
             >>> import remote_access_base
-            >>> obj = remlib.RemoteDock(image, ip, port, roscommand, rospackage, roslaunchfile)
+            >>> obj = remlib.RemoteDock(image, ip, port, roscommand, rospackage, roslaunchfile, ca_cert)
         ..  >>> obj.startcheck()
     """
-    
-    def __init__(self, image, ip, port, roscommand, rospackage, roslaunchfile):
+
+    allowed_roscommands = ['roslaunch']
+
+    def __init__(self, ip, port, roscommand, ca_cert=None):
+        # how to reach the client?
         self.ip = ip
         self.port = port
-        self.roscommand = roscommand
-        self.rospackage = rospackage
-        self.roslaunchfile = roslaunchfile
         self.ip_str = "tcp://" + self.ip + ":" + self.port
-        self.docker_client = docker.DockerClient(self.ip_str)
+        self.tls = docker.tls.TLSConfig(ca_cert=ca_cert) if ca_cert else False
+        self.docker_client = docker.DockerClient(self.ip_str, tls=self.tls)
+        # What is the ros command?
+        command = roscommand.split(' ')
+        if command[0] in RemoteDock.allowed_roscommands:
+            self.roscommand = command[0]
+        else:
+            raise NotImplementedError('The ros command >'+command[0]+'< is currently not supported.')
+        self.rospackage = command[1]
+        self.roslaunchfile = command[2]
+        # What is the image name going to be?
+        rp = rospkg.RosPack()
+        registry_string = socket.gethostname() + ":5000/"
+        self.name = registry_string + \
+                    '_'.join(command).replace('.', '_') + \
+                    ':' + str(path_checksum(rp.get_path(self.rospackage)))
 
     def get_image_name(self):
         return '_'.join([self.roscommand, self.rospackage, self.roslaunchfile])  # TODO: hash of directory?
         
-    def startcheck(self):
+    def does_exist_on_client(self):
         """
-        Creates an image name based on the rospackage user wants to run
-        and checks whether a similar image exists or not
+        Checks whether a similar image exists or not
         """
         images = self.docker_client.images.list()
         print("Currently available images:")
-        print(images)
-
-        var = md5compare(self.image, img_nm)
-        return var
+        image_names = map(lambda i: i.tags[0], images)
+        return self.name in image_names
     
     
     def create_docker_image(self):
