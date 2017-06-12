@@ -114,7 +114,7 @@ class RemoteDock():
         self.roslaunchfile = command[2]
         # What is the image name going to be?
         rp = rospkg.RosPack()
-        registry_string = socket.gethostname() + ":5000/"
+        registry_string = socket.getfqdn() + ":5000/"
         self.name = registry_string + \
                     '_'.join(command).replace('.', '_') + \
                     ':' + str(path_checksum(rp.get_path(self.rospackage)))
