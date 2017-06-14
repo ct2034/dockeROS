@@ -97,7 +97,7 @@ class RemoteDock():
 
     allowed_roscommands = ['roslaunch']
 
-    def __init__(self, ip, port, roscommand, ca_cert=None):
+    def __init__(self, ip, port, roscommand, config, ca_cert=None):
         # how to reach the client?
         self.ip = ip
         self.port = port
@@ -118,6 +118,7 @@ class RemoteDock():
         self.name = registry_string + \
                     '_'.join(command).replace('.', '_') + \
                     ':' + str(path_checksum(rp.get_path(self.rospackage)))
+        print(config)
 
     def get_image_name(self):
         return '_'.join([self.roscommand, self.rospackage, self.roslaunchfile])  # TODO: hash of directory?

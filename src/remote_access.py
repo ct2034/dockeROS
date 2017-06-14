@@ -9,6 +9,8 @@ import subprocess
 import sys
 import remote_access_base
 import logging
+import yaml
+import rospkg
 
 logging.getLogger('root').setLevel(logging.DEBUG)
 if logging.getLogger('root').getEffectiveLevel() == logging.DEBUG:
@@ -66,8 +68,12 @@ except:
 dockercmd_img = "docker -H tcp://" + ipwhl + " images"
 subprocess.call(dockercmd_img, shell=True)
 
+rp = rospkg.RosPack()
+fname = rp.get_path('rosedge') + '/config.yaml'
+config = yaml.load(open(fname))
 dock_obj = remote_access_base.RemoteDock(ip, port,
                                          ' '.join([roscommand, rospackage, roslaunchfile]),
+                                         config=config,
                                          ca_cert='/home/cch/.docker/ca.pem')
 if not dock_obj.does_exist_on_client():
     dock_obj.create_docker_image()
