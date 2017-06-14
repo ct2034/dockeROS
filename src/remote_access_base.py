@@ -61,7 +61,8 @@ def path_checksum(this_path):
                 fh = open(this_path, 'rb')
                 while 1:
                     buf = fh.read(4096)
-                    if not buf: break
+                    if not buf:
+                        break
                     checksum.update(buf)
                 fh.close()
 
