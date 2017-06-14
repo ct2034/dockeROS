@@ -21,7 +21,7 @@ else:
 
 usage = "USAGE:\n" + \
         "," * 80 + "\n" \
-        "$ rosedge <IP> roslaunch ros_naviagtion move_base.launch\n" \
+        "$ rosedge <HOST:PORT> roslaunch ros_naviagtion move_base.launch\n" \
         "Will perform the roslaunch command in a docker container at the mentioned IP\n" + \
         "'" * 80 + "\n" \
 
@@ -32,13 +32,13 @@ def subprocess_cmd(command):
 
 try:
     ipwhl = sys.argv[1]
-    ip = ipwhl.split(':')[0]
+    host = ipwhl.split(':')[0]
     port = ipwhl.split(':')[1]
     debug_eval_print('ip')
     debug_eval_print('port')
 except:
     print(usage)
-    print("IP address not entered! exiting script")
+    print("Host and/or port not entered! exiting script")
     exit()
 
 try:
@@ -71,7 +71,7 @@ subprocess.call(dockercmd_img, shell=True)
 rp = rospkg.RosPack()
 fname = rp.get_path('rosedge') + '/config.yaml'
 config = yaml.load(open(fname))
-dock_obj = remote_access_base.RemoteDock(ip, port,
+dock_obj = remote_access_base.RemoteDock(host, port,
                                          ' '.join([roscommand, rospackage, roslaunchfile]),
                                          config=config,
                                          ca_cert='/home/cch/.docker/ca.pem')
