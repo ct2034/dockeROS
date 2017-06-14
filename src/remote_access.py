@@ -34,8 +34,6 @@ try:
     ipwhl = sys.argv[1]
     host = ipwhl.split(':')[0]
     port = ipwhl.split(':')[1]
-    debug_eval_print('ip')
-    debug_eval_print('port')
 except:
     print(usage)
     print("Host and/or port not entered! exiting script")
@@ -43,7 +41,6 @@ except:
 
 try:
     roscommand = sys.argv[2]
-    debug_eval_print('roscommand')
 except:
     print(usage)
     print("Ros command not entered! exiting script")
@@ -51,7 +48,6 @@ except:
 
 try:
     rospackage = sys.argv[3]
-    debug_eval_print('rospackage')
 except:
     print(usage)
     print("Ros package name not entered! exiting script")
@@ -59,14 +55,13 @@ except:
 
 try:
     roslaunchfile = sys.argv[4]
-    debug_eval_print('roslaunchfile')
 except:
     print(usage)
     print("Ros launch file name not entered! exiting script")
     exit()
 
-dockercmd_img = "docker -H tcp://" + ipwhl + " images"
-subprocess.call(dockercmd_img, shell=True)
+print("ROS command to be executed:\n > " + " ".join([roscommand, rospackage, roslaunchfile]))
+print("On Server:\n > " + ':'.join([host,port]))
 
 rp = rospkg.RosPack()
 fname = rp.get_path('rosedge') + '/config.yaml'
@@ -75,12 +70,12 @@ dock_obj = remote_access_base.RemoteDock(host, port,
                                          ' '.join([roscommand, rospackage, roslaunchfile]),
                                          config=config,
                                          ca_cert='/home/cch/.docker/ca.pem')
-if not dock_obj.does_exist_on_client():
-    dock_obj.create_docker_image()
-    dock_obj.create_docker_container()
-    dock_obj.run_docker_commands()
-else:
-    dock_obj.run_existing_image()
+# if not dock_obj.does_exist_on_client():
+#     dock_obj.create_docker_image()
+#     dock_obj.create_docker_container()
+#     dock_obj.run_docker_commands()
+# else:
+#     dock_obj.run_existing_image()
 
 
 

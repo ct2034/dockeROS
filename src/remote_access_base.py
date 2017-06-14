@@ -13,9 +13,11 @@ import hashlib
 import docker
 import shutil
 from os import path
+import json
 
 import logging
 import rospkg
+from debug_print import debug_eval_print
 
 
 class MltThrd(threading.Thread):
@@ -115,21 +117,46 @@ class RemoteDock():
         self.roslaunchfile = command[2]
         # What is the image name going to be?
         rp = rospkg.RosPack()
-        registry_string = socket.getfqdn() + ":5000/"
+        print("\nThe config is:")
+        print(json.dumps(config, indent=2))
+        print("\n")
+        self.path = rp.get_path(self.rospackage)
+        self.rosedge_path = rp.get_path('rosedge')
+        if self.path.startswith('/opt/ros'):
+            print('This is a system package at:\n> ' + self.path)
+            self.user_package = False
+        else:
+            print('This is a user package at:\n> ' + self.path)
+            self.user_package = True
+        self.dockerfile = None
+        for f in os.walk(self.path):
+            fname = f[0]
+            if fname.endswith('/Dockerfile'):
+                self.dockerfile = fname
+                print('This package has a Dockerfile at:\n> ' + self.dockerfile)
+                break
+        if not self.dockerfile:
+            if self.user_package:
+                self.dockerfile = self.rosedge_path + '/source_Dockerfile'
+            else:  # system package
+                self.dockerfile = self.rosedge_path + '/default_Dockerfile'
+            print('Using default Dockerfile:\n> ' + self.dockerfile)
+
+        registry_string = config['registry']['host'] + ':' + str(config['registry']['port']) + '/'
         self.name = registry_string + \
                     '_'.join(command).replace('.', '_') + \
-                    ':' + str(path_checksum(rp.get_path(self.rospackage)))
-        print(config)
+                    ':' + str(path_checksum(self.path))
 
-    def get_image_name(self):
-        return '_'.join([self.roscommand, self.rospackage, self.roslaunchfile])  # TODO: hash of directory?
-        
+        print("The name of the image will be: \n> " + self.name)
+
+
     def does_exist_on_client(self):
         """
         Checks whether a similar image exists or not
         """
         images = self.docker_client.images.list()
         print("Currently available images:")
+        print("image_names")
         image_names = map(lambda i: i.tags[0], images)
         return self.name in image_names
     
@@ -140,6 +167,8 @@ class RemoteDock():
         deploys the built image on the server
         """
         # reading base docker commands
+
+
         copysh_path = os.path.abspath("basedocker") + "/ros_entrypoint.sh"
         base_path = os.path.abspath("basedocker") + "/Dockerfile"
         rd_base = open(base_path, "r")
