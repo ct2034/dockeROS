@@ -100,7 +100,8 @@ class RemoteDock():
 
     allowed_roscommands = ['roslaunch']
 
-    def __init__(self, ip, port, roscommand, config, ca_cert=None):
+    def __init__(self, ip, port, roscommand, config, ca_cert=None,
+                 path_=('This is a system package at:\n> ' + self.path)):
         # how to reach the client?
         self.ip = ip
         self.port = port
@@ -123,7 +124,7 @@ class RemoteDock():
         self.path = rp.get_path(self.rospackage)
         self.rosedge_path = rp.get_path('rosedge')
         if self.path.startswith('/opt/ros'):
-            print('This is a system package at:\n> ' + self.path)
+            print path_
             self.user_package = False
         else:
             print('This is a user package at:\n> ' + self.path)
