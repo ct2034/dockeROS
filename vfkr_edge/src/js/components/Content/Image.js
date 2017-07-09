@@ -9,7 +9,7 @@ export default class Image extends React.Component {
     return (
 		<Card className='blue-grey darken-1' textClassName='white-text' style={{
 			minWidth: 150,
-			maxWidth: 200,
+			maxWidth: 225,
 			margin: "5px"
 		}}>
 			<p><b>ID</b>: {this.props.id}</p> 

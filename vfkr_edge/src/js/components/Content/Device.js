@@ -21,7 +21,7 @@ export default class Device extends React.Component {
     return (
 		<Card className='cyan darken-2' textClassName='white-text' style={{
 			minWidth: 200,
-			maxWidth: 250,
+			maxWidth: 300,
 			margin: "5px"
 		}}>
 			<Bar val="50" name="CPU" />
