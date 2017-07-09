@@ -1,7 +1,9 @@
+/* Header */
 .brand-logo{
 	margin-left: 5px;
 }
 
+/* maybe required for flex to work */
 html,body {
     height:100%;
 }

@@ -7,7 +7,9 @@ import Title from "./Header/Title";
 export default class Header extends React.Component {
   render() {
     return (
-      <div>
+      <div style={{
+          height: "65px"
+        }}>
         <Title/>
         <Navbar brand="Edge Controller" className='grey darken-3' right>
           <NavItem href='get-started.html'><Icon>search</Icon></NavItem>

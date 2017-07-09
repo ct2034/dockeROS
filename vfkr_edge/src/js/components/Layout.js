@@ -7,23 +7,20 @@ import Header from "./Header";
 export default class Layout extends React.Component {
   render() {
     return (
-      <div style={{
-            height: "100%"
-          }}>
-        <div style={{
-            display: "flex",
-            height: "100vh",
-            flexDirection: "column"
-          }}>
+      <div>
+        <div>
           <div style={{
-            flex: 0,
-            alignItems: "stretch"
+            position: "absolute",
+            top: 0,
+            width: "100%"
           }}>
             <Header />
           </div> 
           <div style={{
-            flex: 1,
-            alignItems: "stretch"
+            position: "absolute",
+            top: 65,
+            bottom: 0,
+            width: "100%"
           }}>
             <Content />
           </div> 
