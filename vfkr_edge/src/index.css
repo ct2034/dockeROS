@@ -7,3 +7,41 @@
 html,body {
     height:100%;
 }
+
+/* bars */
+.bar-label {
+    color: white;
+    font: 5px 'opensans-bold', sans-serif;
+    letter-spacing: 2px;
+    font-weight: bold;
+    position: relative;
+    top: 7px;
+    left: 8px;
+}
+
+.bar-suffix {
+  display: inline-block;
+    color: black;
+    font: 15px 'opensans-bold', sans-serif;
+    letter-spacing: 2px;
+    font-weight: bold;
+    position: relative;
+    top: 10px;
+    left: 10px;
+}
+
+.bar-contain {
+    width: 90%;
+    padding: 0;
+    display: inline-block; 
+    border-radius: 1px;
+    margin: 2;
+    margin-bottom: 0 !important;
+    height: 20 !important;
+}
+
+.bar-expand {
+    display: inline-block;
+    border-radius: 1;
+    height: 20 !important;
+}

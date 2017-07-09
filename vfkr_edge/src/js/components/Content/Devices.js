@@ -2,9 +2,9 @@ import React from "react";
 
 import {Card, Col, Row} from "react-materialize";
 
-import Image from "./Image";
+import Device from "./Device";
 
-export default class Images extends React.Component {
+export default class Devices extends React.Component {
   constructor(props) {
 	  super(props);
 	  this.state = {
@@ -19,14 +19,15 @@ export default class Images extends React.Component {
       <div style={{
             display: "flex",
             flexWrap: "wrap",
-            flexFlow: "row wrap"
+            flexFlow: "row wrap",
+            alignItems: "flex-start"
           }}> 
         {
           ids.map((id) => 
           <div id={id} style={{
             flex: 1
           }}>
-            <Image id={id} key={id} />
+            <Device id={id} key={id} />
           </div>)}
       </div>
     )
