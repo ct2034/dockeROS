@@ -5,15 +5,13 @@ Created on Wed Jun 21 15:30:15 2017
 @author: cch-student
 """
 
-# sample.py
 import falcon
 import json
 import socket
 import ast
 import pymongo as pymo
 import datetime
-from uuid import getnode as get_mac
-
+from falcon_multipart.middleware import MultipartMiddleware
 
 class ThingsResource(object):
     def on_get(self, req, resp):
@@ -21,32 +19,25 @@ class ThingsResource(object):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))
         doc = {'ip_add':s.getsockname()[0]}
-#        doc = {
-#            'images': [
-#                {
-#                    'href': '/images/1eaf6ef1-7f2d-4ecc-a8d5-6e8adba7cc0e.png'
-#                }
-#            ],
-#            'ip_add': [
-#                {
-#                    'add': s.getsockname()[0]
-#                }
-#            ]
-#        }
         s.close()
         resp.status = falcon.HTTP_200  # This is the default status
         resp.body = json.dumps(doc, ensure_ascii=False)
         
     def on_put(self, req, resp):
         print "on put"
+        print req.get_param('uuid')
         body = req.stream.read()
+        print "on put1"
         if not body:
             raise falcon.HTTPBadRequest('Empty request body','A valid JSON document is required.')
         
         try:
             req.context['doc'] = json.loads(body.decode('utf-8'))
+            print "on put2"
             request_body = req.stream.read()
+            print "on put3"
             req.json = json.loads(body)
+            print "on put4"
             print request_body
             
         except KeyError:
@@ -55,16 +46,11 @@ class ThingsResource(object):
                 'A thing must be submitted in the request body.')
 
         tmpv = ast.literal_eval(body)
-        print tmpv['id']#
         client = pymo.MongoClient('localhost', 27017)
         db = client.test_database
-        post = {"author": "Mike",
-                "text": "My first blog post!",
-                "tags": ["mongodb", "python", "pymongo"],
-                "date": datetime.datetime.utcnow()}
+        
 
-        mac = get_mac()
-        tmpv['mac_add']=mac        
+        tmpv['time'] = datetime.datetime.utcnow()
         posts = db.posts
         post_id = posts.insert(tmpv)
         post_id
@@ -74,18 +60,10 @@ class ThingsResource(object):
         #post_id
         resp.status = falcon.HTTP_201
         
-        resp.body = body
-        #resp.location = '/%s/things/%s' % (user_id, proper_thing['id'])
-
-            
-        #doc1 = {'ip_add1':}
-#        resp.body = ('\nTwo things awe me most, the starry sky '
-#                     'above me and the moral law within me.\n'
-#                     '\n'
-#                     '    ~ Immanuel Kant\n\n')
+        resp.body = "OK!"
 
 # falcon.API instances are callable WSGI apps
-app = falcon.API()
+app = falcon.API(middleware=[MultipartMiddleware()])
 print "sts"
 # Resources are represented by long-lived class instances
 things = ThingsResource()
