@@ -56,7 +56,7 @@ export default class Device extends React.Component {
 			<p><b>Name</b>: Device {this.props.id}</p> 
 			<Collapsible>
 				<CollapsibleItem header='First' icon='pause_circle_filled'>
-					<Image id="3" />
+					<Image id="3" inDeviceCollapsible />
 				</CollapsibleItem>
 				<CollapsibleItem header='Second' icon='play_circle_filled'>
 					<p>Lorem ipsum dolor sit amet</p>
