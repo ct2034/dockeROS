@@ -10,22 +10,21 @@ import socket
 from uuid import getnode as get_mac
 import subprocess
 
+server = "172.0.0.1"
+
 """Getting IP address """
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.connect(("8.8.8.8", 80))
-doc = {'ip_add':s.getsockname()[0]}
+s.connect((server, 80))
+doc = {'ip_add': s.getsockname()[0]}
 
 """Getting mac address for uuid"""
 mac = get_mac()
-doc['uuid']=mac
+doc['uuid'] = mac
 
 """Writing a JSON file"""
-with open('/home/robotino/rosedge/rest_py/rob_config.json','w') as outfile:
-	json.dump(doc,outfile)
+with open('/tmp/rob_config.json', 'w') as outfile:
+    json.dump(doc, outfile)
 
 """Sending Json command to Server Robot"""
-put_ip = 'http PUT 10.2.1.10:8000/things < rob_config.json'
+put_ip = 'curl -i -X PUT %s:8000/things < /tmp/rob_config.json' % server
 subprocess.call(put_ip, shell=True)
-
-
-

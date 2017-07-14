@@ -30,7 +30,7 @@ class Robconnect(object):
      
     """Handles PUT requests and stores incoming data it in Mongodb database"""
     def on_put(self, req, resp):
-        print "on put"
+        print("on put")
         body = req.stream.read()
         
         if not body:
@@ -41,7 +41,7 @@ class Robconnect(object):
             req.context['doc'] = json.loads(body.decode('utf-8'))
             request_body = req.stream.read()
             req.json = json.loads(body)
-            print request_body
+            print(request_body)
             
         except KeyError:
             raise falcon.HTTPBadRequest(
@@ -58,16 +58,16 @@ class Robconnect(object):
         posts = db.posts
         post_id = posts.insert(tmpv)
         post_id
-        print db.collection_names()
+        print(db.collection_names())
         for post in posts.find():
-            print post
+            print(post)
         resp.status = falcon.HTTP_201
         resp.body = "OK!"
 
 
 """initializing falcon app"""
 app = falcon.API(middleware=[MultipartMiddleware()])
-print "Server started successfully!"
+print("Server started successfully!")
 # Resources are represented by long-lived class instances
 things = Robconnect()
 
