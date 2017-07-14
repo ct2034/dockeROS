@@ -1,10 +1,13 @@
 import React from "react";
 
 import SplitPane from "react-split-pane";
+import { DragDropContext } from 'react-dnd';
+import { default as TouchBackend } from 'react-dnd-touch-backend';
 
 import Images from "./Content/Images";
 import Devices from "./Content/Devices";
 
+@DragDropContext(TouchBackend)
 export default class Content extends React.Component {
 
   constructor(props) {

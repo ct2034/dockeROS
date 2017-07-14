@@ -23,10 +23,10 @@ export default class Images extends React.Component {
           }}> 
         {
           ids.map((id) => 
-          <div id={id} style={{
+          <div key={id} style={{
             flex: 1
           }}>
-            <Image id={id} key={id} />
+            <Image id={id} />
           </div>)}
       </div>
     )

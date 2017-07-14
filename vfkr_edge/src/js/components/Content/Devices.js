@@ -24,10 +24,10 @@ export default class Devices extends React.Component {
           }}> 
         {
           ids.map((id) => 
-          <div id={id} style={{
+          <div key={id} style={{
             flex: 1
           }}>
-            <Device id={id} key={id} />
+            <Device id={id} />
           </div>)}
       </div>
     )
