@@ -27,11 +27,20 @@ export default class Device extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-  		metrics: {
-  			cpu: 32,
-	        mem: 82
-	    }
+  		metrics_cpu: 0,
+	    metrics_mem: 0
   	};
+
+  	this.updateMetrics()
+  }
+
+  updateMetrics() {
+  	this.setState({
+  		metrics_cpu: Math.random()*100,
+		metrics_mem: Math.random()*100
+  	})
+
+  	setTimeout(this.updateMetrics.bind(this), 1000);
   }
 
   render() {
@@ -41,8 +50,8 @@ export default class Device extends React.Component {
 			maxWidth: 300,
 			margin: "5px"
 		}}>
-			<Bar val="50" name="CPU" />
-			<Bar val="98" name="Memory" />
+			<Bar val={this.state.metrics_cpu} name="CPU" id="1" />
+			<Bar val={this.state.metrics_mem} name="Memory" id="2" />
 			<p><b>ID</b>: {this.props.id}</p> 
 			<p><b>Name</b>: Device {this.props.id}</p> 
 			<Collapsible>
