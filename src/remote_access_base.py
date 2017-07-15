@@ -18,6 +18,7 @@ import json
 import logging
 import rospkg
 from debug_print import debug_eval_print
+from shutil import copyfile
 
 
 class MltThrd(threading.Thread):
@@ -29,6 +30,7 @@ class MltThrd(threading.Thread):
     def run(self):
         # execute the command, queue the result
         subprocess.call(self.cmd, shell=True)
+
 
 def compare(str1, str2):
     """
@@ -43,6 +45,7 @@ def compare(str1, str2):
     m1.update(str1)
     m2.update(str2)
     return m1.digest() == m2.digest()
+
 
 def path_checksum(this_path):
     """
@@ -75,9 +78,11 @@ def path_checksum(this_path):
             if path.isdir(p):
                 path.walk(p, _update_checksum, chksum)
             elif path.isfile(path):
-                _update_checksum(chksum, path.dirname(path), path.basename(path))
+                _update_checksum(chksum, path.dirname(
+                    path), path.basename(path))
 
     return chksum.hexdigest()
+
 
 class RemoteDock():
     """
@@ -91,7 +96,7 @@ class RemoteDock():
             package file
             rospackage (str): the user specified rospackage which should run
             roslaunchfile (str) : the specific ros file to be run
-            
+
         Example:
             >>> import remote_access_base
             >>> obj = remlib.RemoteDock(image, ip, port, roscommand, rospackage, roslaunchfile, ca_cert)
@@ -100,8 +105,7 @@ class RemoteDock():
 
     allowed_roscommands = ['roslaunch']
 
-    def __init__(self, ip, port, roscommand, config, ca_cert=None,
-                 path_=('This is a system package at:\n> ' + self.path)):
+    def __init__(self, ip, port, roscommand, config, ca_cert=None):
         # how to reach the client?
         self.ip = ip
         self.port = port
@@ -113,7 +117,8 @@ class RemoteDock():
         if command[0] in RemoteDock.allowed_roscommands:
             self.roscommand = command[0]
         else:
-            raise NotImplementedError('The ros command >'+command[0]+'< is currently not supported.')
+            raise NotImplementedError(
+                'The ros command >' + command[0] + '< is currently not supported.')
         self.rospackage = command[1]
         self.roslaunchfile = command[2]
         # What is the image name going to be?
@@ -124,7 +129,7 @@ class RemoteDock():
         self.path = rp.get_path(self.rospackage)
         self.rosedge_path = rp.get_path('rosedge')
         if self.path.startswith('/opt/ros'):
-            print path_
+            print('This is a system package at:\n> ' + self.path)
             self.user_package = False
         else:
             print('This is a user package at:\n> ' + self.path)
@@ -143,13 +148,13 @@ class RemoteDock():
                 self.dockerfile = self.rosedge_path + '/default_Dockerfile'
             print('Using default Dockerfile:\n> ' + self.dockerfile)
 
-        registry_string = config['registry']['host'] + ':' + str(config['registry']['port']) + '/'
+        registry_string = config['registry']['host'] + \
+            ':' + str(config['registry']['port']) + '/'
         self.name = registry_string + \
-                    '_'.join(command).replace('.', '_') + \
-                    ':' + str(path_checksum(self.path))
+            '_'.join(command).replace('.', '_') + \
+            ':' + str(path_checksum(self.path))
 
         print("The name of the image will be: \n> " + self.name)
-
 
     def does_exist_on_client(self):
         """
@@ -158,63 +163,72 @@ class RemoteDock():
         images = self.docker_client.images.list()
         print("Currently available images:")
         print("image_names")
-        image_names = map(lambda i: i.tags[0], images)
+        for image in images:
+            print(image)
+        # image_names = map(lambda i: i.tags[0], images)
         return self.name in image_names
-    
-    
+
     def create_docker_image(self):
         """
         Compiles a baseDocker image with specific image of a rospackage and 
         deploys the built image on the server
         """
+        print(self.path)
+        copyfile(self.dockerfile, self.path + '/Dockerfile')
+        client = docker.from_env()
+        client.images.build(path=self.path,
+                     tag=self.name,
+                     buildargs={
+                         "PACKAGE": self.rospackage
+                     }
+                     )
+
         # reading base docker commands
+        # copysh_path = os.path.abspath("basedocker") + "/ros_entrypoint.sh"
+        # base_path = os.path.abspath("basedocker") + "/Dockerfile"
+        # rd_base = open(base_path, "r")
+        # contents = rd_base.readlines()
+        # rd_base.close()
 
+        # # reading docker file of specific launch files from ros packages
+        # folder_cmd = "find ~ -type d -name " + \
+        #     self.rospackage + "_Dockerfile >> tmpfile"
+        # subprocess.call(folder_cmd, shell=True)
+        # pathtmpfile = os.path.abspath("tmpfile")
+        # tmpfile = open(pathtmpfile, "r")
+        # pkg_path = tmpfile.read()
+        # tmpfile.close()
+        # pkg_path = pkg_path[:-1]
+        # os.remove(pathtmpfile)
+        # pkg_path = pkg_path + "/Dockerfile"
+        # dock_read = open(pkg_path, "r")
+        # tmp_contents = dock_read.readlines()
+        # dock_read.close()
+        # idx = 9
 
-        copysh_path = os.path.abspath("basedocker") + "/ros_entrypoint.sh"
-        base_path = os.path.abspath("basedocker") + "/Dockerfile"
-        rd_base = open(base_path, "r")
-        contents = rd_base.readlines()
-        rd_base.close()
+        # for i in range(len(tmp_contents)):
+        #     contents.insert(idx, tmp_contents[i])
+        #     idx = idx + 1
 
-        # reading docker file of specific launch files from ros packages
-        folder_cmd = "find ~ -type d -name " + self.rospackage + "_Dockerfile >> tmpfile" 
-        subprocess.call(folder_cmd, shell=True)
-        pathtmpfile = os.path.abspath("tmpfile")
-        tmpfile = open(pathtmpfile, "r")
-        pkg_path = tmpfile.read()
-        tmpfile.close()
-        pkg_path = pkg_path[:-1]
-        os.remove(pathtmpfile)
-        pkg_path = pkg_path + "/Dockerfile"
-        dock_read = open(pkg_path, "r")
-        tmp_contents = dock_read.readlines()
-        dock_read.close()
-        idx = 9
-        
-        for i in range(len(tmp_contents)):
-            contents.insert(idx, tmp_contents[i])
-            idx = idx + 1
-    
-        os.mkdir(self.rospackage + "_docker")
-        tmppath = os.getcwd() + '/' + self.rospackage + "_docker"
-        tmentrysh = tmppath +  "/ros_entrypoint.sh"
-        shutil.copyfile(copysh_path,tmentrysh)
-        os.chdir(tmppath)
-        make_exec = "chmod +x ros_entrypoint.sh"
-        subprocess.call(make_exec,shell=True)
-        file = open('Dockerfile', 'w')
-        contents = "".join(contents)
-        file.write(contents)
-        file.close()
-        tarcode = "tar zcf Dockerfile.tar.gz Dockerfile ros_entrypoint.sh"
-        subprocess.call(tarcode, shell=True)
-        buildcode = "curl -v -X POST -H " + '"Content-Type:application/tar"' + \
-            " --data-binary '@Dockerfile.tar.gz' http://" + self.ip + ":" + \
-            self.port + "/build?t=" + self.image        
-        status = subprocess.call(buildcode, shell=True)
-        return status
-    
-    
+        # os.mkdir(self.rospackage + "_docker")
+        # tmppath = os.getcwd() + '/' + self.rospackage + "_docker"
+        # tmentrysh = tmppath + "/ros_entrypoint.sh"
+        # shutil.copyfile(copysh_path, tmentrysh)
+        # os.chdir(tmppath)
+        # make_exec = "chmod +x ros_entrypoint.sh"
+        # subprocess.call(make_exec, shell=True)
+        # file = open('Dockerfile', 'w')
+        # contents = "".join(contents)
+        # file.write(contents)
+        # file.close()
+        # tarcode = "tar zcf Dockerfile.tar.gz Dockerfile ros_entrypoint.sh"
+        # subprocess.call(tarcode, shell=True)
+        # buildcode = "curl -v -X POST -H " + '"Content-Type:application/tar"' + \
+        #     " --data-binary '@Dockerfile.tar.gz' http://" + self.ip + ":" + \
+        #     self.port + "/build?t=" + self.image
+        # status = subprocess.call(buildcode, shell=True)
+        # return status
+
     def create_docker_container(self):
         """
         Creates a Docker container and uses the image built from function 
@@ -235,30 +249,29 @@ class RemoteDock():
         cli.start(container['Id'])
         self.container_id = container['Id']
         return container['Id']
-    
-        
+
     def run_docker_commands(self):
         """
         Runs the created docker container using the generated container id 
         from createDockerContainer function
         """
         cli = docker.Client(base_url=self.ip_str)
-        rosip_str = cli.inspect_container(self.container_id)['NetworkSettings']['IPAddress']
+        rosip_str = cli.inspect_container(self.container_id)[
+            'NetworkSettings']['IPAddress']
         dockerexec_source = "docker -H tcp://" + self.ip + ":" + \
-        self.port + " exec -it " + self.container_id + " bash -c \
+            self.port + " exec -it " + self.container_id + " bash -c \
         'source ros_entrypoint.sh;export ROS_MASTER_URI=http://'" + self.ip + "':11311;\
-        export ROS_IP='"+ rosip_str +"';'" + self.roscommand + "' '" + self.rospackage + "' '" \
-        + self.roslaunchfile
-        subprocess.call(dockerexec_source,shell=True)
-    
-      
+        export ROS_IP='" + rosip_str + "';'" + self.roscommand + "' '" + self.rospackage + "' '" \
+            + self.roslaunchfile
+        subprocess.call(dockerexec_source, shell=True)
+
     def run_existing_image(self):
         """
         Runs the existing image in the local machine on the robot
         """
         dockercmd_runimg = "docker -H tcp://" + self.ip + ":" + self.port + " run -it --rm -u " + \
-                            '"$(id -u):$(id -g)" ' + \
-                            "-v $HOME/.ros:/.ros -v $HOME/.config/catkin:/.config/catkin:ro " + \
-                            "-v $(pwd):$(pwd) -w $(pwd) " + self.image
-        
+            '"$(id -u):$(id -g)" ' + \
+            "-v $HOME/.ros:/.ros -v $HOME/.config/catkin:/.config/catkin:ro " + \
+            "-v $(pwd):$(pwd) -w $(pwd) " + self.image
+
         subprocess.call(dockercmd_runimg, shell=True)

@@ -71,11 +71,9 @@ dock_obj = remote_access_base.RemoteDock(host, port,
                                          config=config,
                                          ca_cert='/home/cch/.docker/ca.pem')
 # if not dock_obj.does_exist_on_client():
-#     dock_obj.create_docker_image()
-#     dock_obj.create_docker_container()
-#     dock_obj.run_docker_commands()
 # else:
 #     dock_obj.run_existing_image()
 
 
-
+dock_obj.create_docker_image()
+dock_obj.run_docker_image()

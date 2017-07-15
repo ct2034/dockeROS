@@ -10,7 +10,12 @@ export default class Images extends React.Component {
 	  this.state = {
 	    ids: props.ids
 	  };
-	}
+
+    $.get("http://localhost:5000/v2/_catalog", function(data, status){
+        console.log(data);
+    });
+  }
+
 
   render() {
   	const ids = this.props.ids
