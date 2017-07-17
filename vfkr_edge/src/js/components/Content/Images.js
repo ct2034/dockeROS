@@ -8,17 +8,24 @@ export default class Images extends React.Component {
   constructor(props) {
 	  super(props);
 	  this.state = {
-	    ids: props.ids
+	    ids: ['a', 'b']
 	  };
 
-    $.get("http://localhost:5000/v2/_catalog", function(data, status){
-        console.log(data);
-    });
+    this.update()
   }
 
+  update() {
+    $.get("http://localhost:5000/v2/_catalog", function(data, status){
+        if (status == 'success') {
+          this.setState({ids: data['repositories']});
+        }
+    }.bind(this));
+
+    setTimeout(this.update.bind(this), 1000);
+  }
 
   render() {
-  	const ids = this.props.ids
+  	const ids = this.state.ids
 
     return (
       <div style={{

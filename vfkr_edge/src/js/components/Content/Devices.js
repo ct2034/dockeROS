@@ -8,12 +8,12 @@ export default class Devices extends React.Component {
   constructor(props) {
 	  super(props);
 	  this.state = {
-	    ids: props.ids
+	    ids: [0, 1]
 	  };
 	}
 
   render() {
-  	const ids = this.props.ids
+  	const ids = this.state.ids
 
     return (
       <div style={{

@@ -66,6 +66,7 @@ export default class Image extends React.Component {
 								minWidth: 150,
 								maxWidth: 225,
 								margin: "5px",
+								overflowWrap: "break-word",
 								background: 'var(--vfkr-orange)'
 							}
 						} > {
