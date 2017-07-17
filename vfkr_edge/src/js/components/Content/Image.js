@@ -53,10 +53,10 @@ export default class Image extends React.Component {
 			}.bind(this));
 			$.get("http://localhost:5000/v2/"+this.props.name+"/manifests/latest", function(data, status) {
 				if (status == 'success') {
+					const architecture = JSON.parse(data)["architecture"]
 					this.setState({
-						architecture: data["architecture"]
+						architecture
 					});
-					// console.log(data)
 				}
 			}.bind(this));
 
