@@ -17,6 +17,7 @@ import json
 
 import logging
 import rospkg
+import sys
 from debug_print import debug_eval_print
 from shutil import copyfile
 
@@ -112,6 +113,9 @@ class RemoteDock():
         self.ip_str = "tcp://" + self.ip + ":" + self.port
         self.tls = docker.tls.TLSConfig(ca_cert=ca_cert) if ca_cert else False
         self.docker_client = docker.DockerClient(self.ip_str, tls=self.tls)
+        # Version info
+        print("Python Version: " + sys.version)
+        print("docker-py Version: " + docker.__version__)
         # What is the ros command?
         command = roscommand.split(' ')
         if command[0] in RemoteDock.allowed_roscommands:
@@ -149,10 +153,10 @@ class RemoteDock():
             print('Using default Dockerfile:\n> ' + self.dockerfile)
 
         registry_string = config['registry']['host'] + \
-            ':' + str(config['registry']['port']) + '/'
+                          ':' + str(config['registry']['port']) + '/'
         self.name = registry_string + \
-            '_'.join(command).replace('.', '_') + \
-            ':' + str(path_checksum(self.path))
+                    '_'.join(command).replace('.', '_')
+        self.tag = str(path_checksum(self.path))
 
         print("The name of the image will be: \n> " + self.name)
 
@@ -168,110 +172,51 @@ class RemoteDock():
         # image_names = map(lambda i: i.tags[0], images)
         return self.name in image_names
 
-    def create_docker_image(self):
+    def build_docker_image(self):
         """
         Compiles a baseDocker image with specific image of a rospackage and 
         deploys the built image on the server
         """
         print(self.path)
         copyfile(self.dockerfile, self.path + '/Dockerfile')
-        client = docker.from_env()
-        client.images.build(path=self.path,
-                     tag=self.name,
-                     buildargs={
-                         "PACKAGE": self.rospackage
-                     }
-                     )
 
-        # reading base docker commands
-        # copysh_path = os.path.abspath("basedocker") + "/ros_entrypoint.sh"
-        # base_path = os.path.abspath("basedocker") + "/Dockerfile"
-        # rd_base = open(base_path, "r")
-        # contents = rd_base.readlines()
-        # rd_base.close()
+        # client = docker.from_env()
+        # res = client.images.build(path=self.path,
+        #                           tag=self.name,
+        #                           buildargs={
+        #                               "PACKAGE": self.rospackage
+        #                           }
+        #                           )
+        # print(res)
 
-        # # reading docker file of specific launch files from ros packages
-        # folder_cmd = "find ~ -type d -name " + \
-        #     self.rospackage + "_Dockerfile >> tmpfile"
-        # subprocess.call(folder_cmd, shell=True)
-        # pathtmpfile = os.path.abspath("tmpfile")
-        # tmpfile = open(pathtmpfile, "r")
-        # pkg_path = tmpfile.read()
-        # tmpfile.close()
-        # pkg_path = pkg_path[:-1]
-        # os.remove(pathtmpfile)
-        # pkg_path = pkg_path + "/Dockerfile"
-        # dock_read = open(pkg_path, "r")
-        # tmp_contents = dock_read.readlines()
-        # dock_read.close()
-        # idx = 9
+        cli = docker.APIClient(base_url='unix://var/run/docker.sock')
+        it = cli.build(path=self.path,
+                       tag=self.name + ":" + self.tag,
+                       buildargs={
+                           "PACKAGE": self.rospackage
+                       },
+                       labels={
+                           "label_a": "1",
+                           "label_b": "2"
+                       }
+                       )
+        for l in it:
+            ld = eval(l)
+            if ld.__class__ == dict and "stream" in ld.keys():
+                print(ld["stream"].strip())
 
-        # for i in range(len(tmp_contents)):
-        #     contents.insert(idx, tmp_contents[i])
-        #     idx = idx + 1
-
-        # os.mkdir(self.rospackage + "_docker")
-        # tmppath = os.getcwd() + '/' + self.rospackage + "_docker"
-        # tmentrysh = tmppath + "/ros_entrypoint.sh"
-        # shutil.copyfile(copysh_path, tmentrysh)
-        # os.chdir(tmppath)
-        # make_exec = "chmod +x ros_entrypoint.sh"
-        # subprocess.call(make_exec, shell=True)
-        # file = open('Dockerfile', 'w')
-        # contents = "".join(contents)
-        # file.write(contents)
-        # file.close()
-        # tarcode = "tar zcf Dockerfile.tar.gz Dockerfile ros_entrypoint.sh"
-        # subprocess.call(tarcode, shell=True)
-        # buildcode = "curl -v -X POST -H " + '"Content-Type:application/tar"' + \
-        #     " --data-binary '@Dockerfile.tar.gz' http://" + self.ip + ":" + \
-        #     self.port + "/build?t=" + self.image
-        # status = subprocess.call(buildcode, shell=True)
-        # return status
-
-    def create_docker_container(self):
-        """
-        Creates a Docker container and uses the image built from function 
-        createDockerImg and deploys it directly on the server
-        """
-        cli = docker.Client(base_url=self.ip_str)
-        container = cli.create_container(self.image,
-                                         hostname='3e93a4b05cf6',
-                                         user='1000:1000',
-                                         stdin_open=True,
-                                         tty=True,
-                                         entrypoint='/ros_entrypoint.sh',
-                                         command=["bash"],
-                                         environment=[
-                                             "PATH/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"],
-                                         working_dir='/',
-                                         volumes='$HOME/.config/catkin:/.config/catkin:ro')
-        cli.start(container['Id'])
-        self.container_id = container['Id']
-        return container['Id']
-
-    def run_docker_commands(self):
-        """
-        Runs the created docker container using the generated container id 
-        from createDockerContainer function
-        """
-        cli = docker.Client(base_url=self.ip_str)
-        rosip_str = cli.inspect_container(self.container_id)[
-            'NetworkSettings']['IPAddress']
-        dockerexec_source = "docker -H tcp://" + self.ip + ":" + \
-            self.port + " exec -it " + self.container_id + " bash -c \
-        'source ros_entrypoint.sh;export ROS_MASTER_URI=http://'" + self.ip + "':11311;\
-        export ROS_IP='" + rosip_str + "';'" + self.roscommand + "' '" + self.rospackage + "' '" \
-            + self.roslaunchfile
-        subprocess.call(dockerexec_source, shell=True)
-
-    def run_existing_image(self):
-        """
-        Runs the existing image in the local machine on the robot
-        """
-        dockercmd_runimg = "docker -H tcp://" + self.ip + ":" + self.port + " run -it --rm -u " + \
-            '"$(id -u):$(id -g)" ' + \
-            "-v $HOME/.ros:/.ros -v $HOME/.config/catkin:/.config/catkin:ro " + \
-            "-v $(pwd):$(pwd) -w $(pwd) " + self.image
-
-        subprocess.call(dockercmd_runimg, shell=True)
+        # Tag as latest (rebuild ?!?)
+        it = cli.build(path=self.path,
+                       tag=self.name + ":" + "latest",
+                       buildargs={
+                           "PACKAGE": self.rospackage
+                       },
+                       labels={
+                           "label_a": "1",
+                           "label_b": "2"
+                       }
+                       )
+        for l in it:
+            ld = eval(l)
+            if ld.__class__ == dict and "stream" in ld.keys():
+                print(ld["stream"].strip())

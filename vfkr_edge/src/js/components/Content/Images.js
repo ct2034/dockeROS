@@ -8,7 +8,7 @@ export default class Images extends React.Component {
   constructor(props) {
 	  super(props);
 	  this.state = {
-	    ids: ['a', 'b']
+	    names: []
 	  };
 
     this.update()
@@ -17,7 +17,7 @@ export default class Images extends React.Component {
   update() {
     $.get("http://localhost:5000/v2/_catalog", function(data, status){
         if (status == 'success') {
-          this.setState({ids: data['repositories']});
+          this.setState({names: data['repositories']});
         }
     }.bind(this));
 
@@ -25,7 +25,7 @@ export default class Images extends React.Component {
   }
 
   render() {
-  	const ids = this.state.ids
+  	const names = this.state.names
 
     return (
       <div style={{
@@ -34,11 +34,11 @@ export default class Images extends React.Component {
             flexFlow: "row wrap"
           }}> 
         {
-          ids.map((id) => 
-          <div key={id} style={{
+          names.map((name) => 
+          <div key={name} style={{
             flex: 1
           }}>
-            <Image id={id} />
+            <Image name={name} />
           </div>)}
       </div>
     )

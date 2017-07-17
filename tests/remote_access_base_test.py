@@ -19,7 +19,7 @@ def test_md5():
 
 
 def test_create_image():
-    assert rd.create_docker_image()
+    assert rd.build_docker_image()
 
 
 def test_create_container():

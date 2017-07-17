@@ -75,5 +75,5 @@ dock_obj = remote_access_base.RemoteDock(host, port,
 #     dock_obj.run_existing_image()
 
 
-dock_obj.create_docker_image()
+dock_obj.build_docker_image()
 dock_obj.run_docker_image()
