@@ -35,8 +35,8 @@ export default class Image extends React.Component {
 		constructor(props) {
 			super(props);
 			this.state = {
-				tags: [],
-				architecture: 'tdb',
+				tags: ['latest', 'kinetic', 'indigo'],
+				architecture: 'amd64',
 				deployable: true
 			};
 			this.props.emitter.addListener('deploy', (name) => {
@@ -45,7 +45,7 @@ export default class Image extends React.Component {
 					this.setState({deployable: false})
 				}
 			});
-			this.update()
+			// this.update()
 		}
 
 		update() {

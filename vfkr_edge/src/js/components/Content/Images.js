@@ -8,10 +8,14 @@ export default class Images extends React.Component {
   constructor(props) {
 	  super(props);
 	  this.state = {
-	    names: []
+	    names: [
+        "ros",
+        "roslaunch_multi_robot_nav_navigation_launch",
+        "ubuntu"
+      ]
 	  };
 
-    this.update()
+    // this.update()
   }
 
   update() {

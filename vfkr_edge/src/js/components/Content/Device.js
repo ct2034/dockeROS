@@ -29,6 +29,7 @@ function collect(connect, monitor) {
 	};
 }
 
+
 export default class Device extends React.Component {
   constructor(props) {
     super(props);
@@ -37,12 +38,40 @@ export default class Device extends React.Component {
     this.state = {
   		metrics_cpu: this.base_metrics_cpu,
 	    metrics_mem: this.base_metrics_mem,
-		running_images: [],
+		running_images: [
+		    {
+		        "Names": [
+		            "/navigation"
+		        ],
+		        "Image": "navigation",
+		        "Command": "/nav.sh",
+		        "State": "running",
+		        "Status": "Up 1 hout"
+		    },
+		    {
+		        "Names": [
+		            "/monitoring"
+		        ],
+		        "Image": "monitoring",
+		        "Command": "/monitoring.sh",
+		        "State": "running",
+		        "Status": "Up 2 days"
+		    },
+		    {
+		        "Names": [
+		            "/control"
+		        ],
+		        "Image": "control",
+		        "Command": "/controller.sh",
+		        "State": "running",
+		        "Status": "Up 5 days"
+		    },
+		],
 		deployable: false,
 		to_deploy: ""
   	};
 
-  	this.updateMetrics()
+  	// this.updateMetrics()
 	this.props.emitter.addListener('deploy', (name) => {
 		console.log(name);
 		this.setState({
@@ -78,8 +107,8 @@ export default class Device extends React.Component {
 		}}>
 			<Bar val={this.state.metrics_cpu} name="CPU" id="1" />
 			<Bar val={this.state.metrics_mem} name="Memory" id="2" />
+			<p><b>Name</b>: {this.props.id.split(':')[0].toUpperCase()}</p> 
 			<p><b>Host</b>: {this.props.id}</p> 
-			<p><b>Name</b>: Device {this.props.id}</p> 
 			{(this.state.running_images.length == 0) ? (<p><i>No images (jet)</i></p>) : (
 				<Collapsible>
 					{this.state.running_images.map((image) =>
@@ -97,16 +126,16 @@ export default class Device extends React.Component {
 				(this.state.deployable) ? (false) : (true)
 			} onClick={function() {
 				console.log(this.state.to_deploy);
-				$.post( "http://"+
-						this.props.id+
-						"/images/create?fromImage="+
-						this.state.to_deploy+
-						"&repo=cchpc.ipa.stuttgart:5000", 
-				function(data, status) {
-					console.log("DEPLOY");
-					console.log(status);
-					console.log(data);
-				}.bind(this));
+				// $.post( "http://"+
+				// 		this.props.id+
+				// 		"/images/create?fromImage="+
+				// 		this.state.to_deploy+
+				// 		"&repo=cchpc.ipa.stuttgart:5000"	, 
+				// function(data, status) {
+				// 	console.log("DEPLOY");
+				// 	console.log(status);
+				// 	console.log(data);
+				// }.bind(this));
 				// $.post( "http://"+this.props.id+"/containers/create", 
 				// { 
 				// 	"Image": "cchpc.ipa.stuttgart:5000/"+this.state.to_deploy 
