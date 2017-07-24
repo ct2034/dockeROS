@@ -38,7 +38,7 @@ export default class Images extends React.Component {
           <div key={name} style={{
             flex: 1
           }}>
-            <Image name={name} />
+            <Image name={name} emitter={this.props.emitter} />
           </div>)}
       </div>
     )

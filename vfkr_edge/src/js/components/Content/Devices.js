@@ -27,7 +27,7 @@ export default class Devices extends React.Component {
           <div key={id} style={{
             flex: 1
           }}>
-            <Device id={id} />
+            <Device id={id} emitter={this.props.emitter} />
           </div>)}
       </div>
     )

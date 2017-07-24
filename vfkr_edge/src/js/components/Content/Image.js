@@ -2,7 +2,8 @@ import React from "react";
 
 import {
 	Card,
-	Col
+	Col,
+	Button
 } from "react-materialize";
 import PropTypes from 'prop-types';
 import {
@@ -24,7 +25,6 @@ function collect(connect, monitor) {
 	}
 }
 
-
 @DragSource('image', imageSource, collect)
 export default class Image extends React.Component {
 		static propTypes = {
@@ -32,14 +32,19 @@ export default class Image extends React.Component {
 			isDragging: PropTypes.bool.isRequired
 		};
 
-
 		constructor(props) {
 			super(props);
 			this.state = {
 				tags: [],
-				architecture: 'tdb'
+				architecture: 'tdb',
+				deployable: true
 			};
-
+			this.props.emitter.addListener('deploy', (name) => {
+				console.log(name);
+				if(this.props.name != name){
+					this.setState({deployable: false})
+				}
+			});
 			this.update()
 		}
 
@@ -112,7 +117,22 @@ export default class Image extends React.Component {
 								marginBottom: "6px"
 							}}/> {
 							this.getContent()
-						} < /Card> < /div >
+						}
+						<Button floating className="black" disabled={
+							(this.state.deployable) ? (false) : (true)
+						} onClick={function() {
+							this.props.emitter.emit('deploy', name);
+							console.log("emit deploy " + name);
+							Materialize.toast('Please select device to deploy to', 4000);
+						}.bind(this)} icon='play_arrow'
+						style={{
+							    position: "absolute",
+							    right: 1,
+							    bottom: "-6",
+							    height: "38px",
+							    padding: 0
+						}} />
+						< /Card> < /div >
 					);
 				}
 			}

@@ -1,8 +1,15 @@
 import React from "react";
 
-import {Card, Col, Collapsible, CollapsibleItem} from "react-materialize";
+import {
+	Button,
+	Card, 
+	Col, 
+	Collapsible, 
+	CollapsibleItem
+} from "react-materialize";
 import PropTypes from 'prop-types';
 import { DragSource } from 'react-dnd';
+import {EventEmitter} from 'fbemitter';
 
 import Bar from "./Bar";
 import RunningImage from "./RunningImage";
@@ -30,10 +37,19 @@ export default class Device extends React.Component {
     this.state = {
   		metrics_cpu: this.base_metrics_cpu,
 	    metrics_mem: this.base_metrics_mem,
-		running_images: []
+		running_images: [],
+		deployable: false,
+		to_deploy: ""
   	};
 
   	this.updateMetrics()
+	this.props.emitter.addListener('deploy', (name) => {
+		console.log(name);
+		this.setState({
+			deployable: true,
+			to_deploy: name
+		})
+	});
   }
 
   updateMetrics() {
@@ -77,6 +93,36 @@ export default class Device extends React.Component {
 						)}	
 				</Collapsible>
 			)}
+			<Button floating className="black" icon='fast_forward' disabled={
+				(this.state.deployable) ? (false) : (true)
+			} onClick={function() {
+				console.log(this.state.to_deploy);
+				$.post( "http://"+
+						this.props.id+
+						"/images/create?fromImage="+
+						this.state.to_deploy+
+						"&repo=cchpc.ipa.stuttgart:5000", 
+				function(data, status) {
+					console.log("DEPLOY");
+					console.log(status);
+					console.log(data);
+				}.bind(this));
+				// $.post( "http://"+this.props.id+"/containers/create", 
+				// { 
+				// 	"Image": "cchpc.ipa.stuttgart:5000/"+this.state.to_deploy 
+				// }, function(data, status) {
+				// 	console.log("DEPLOY");
+				// 	console.log(status);
+				// 	console.log(data);
+				// }.bind(this));
+			}.bind(this)}
+			style={{
+			    position: "absolute",
+			    left: 1,
+			    bottom: "-6",
+			    height: "38px",
+			    padding: 0
+			}} />
 		</Card>
     );
   }

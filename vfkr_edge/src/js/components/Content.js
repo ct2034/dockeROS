@@ -3,6 +3,7 @@ import React from "react";
 import SplitPane from "react-split-pane";
 import { DragDropContext } from 'react-dnd';
 import { default as TouchBackend } from 'react-dnd-touch-backend';
+import {EventEmitter} from 'fbemitter';
 
 import Images from "./Content/Images";
 import Devices from "./Content/Devices";
@@ -17,6 +18,7 @@ export default class Content extends React.Component {
       overflow: "auto",
       margin: "8px"
     };
+    this.emitter = new EventEmitter(); 
   }
 
   render() {
@@ -27,10 +29,10 @@ export default class Content extends React.Component {
       }}>
         <SplitPane split="vertical" defaultSize="38%">
           <div style={this.pane_style}>
-            <Images />
+            <Images emitter={this.emitter}/>
           </div>
           <div style={this.pane_style}>
-            <Devices />
+            <Devices emitter={this.emitter}/>
           </div>
         </SplitPane>
       </div>
