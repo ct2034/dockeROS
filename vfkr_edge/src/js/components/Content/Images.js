@@ -11,7 +11,13 @@ export default class Images extends React.Component {
 	    names: [
         "ros",
         "roslaunch_multi_robot_nav_navigation_launch",
-        "ubuntu"
+        "roslaunch_multi_robot_nav_localization_launch",
+        "roslaunch_holistic_environment_model_launch",
+        "roslaunch_cooperative_slam_launch",
+        "roslaunch_monitoring_launch",
+        "node",
+        "mongodb",
+        "react"
       ]
 	  };
 

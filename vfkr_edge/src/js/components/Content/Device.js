@@ -38,40 +38,12 @@ export default class Device extends React.Component {
     this.state = {
   		metrics_cpu: this.base_metrics_cpu,
 	    metrics_mem: this.base_metrics_mem,
-		running_images: [
-		    {
-		        "Names": [
-		            "/navigation"
-		        ],
-		        "Image": "navigation",
-		        "Command": "/nav.sh",
-		        "State": "running",
-		        "Status": "Up 1 hout"
-		    },
-		    {
-		        "Names": [
-		            "/monitoring"
-		        ],
-		        "Image": "monitoring",
-		        "Command": "/monitoring.sh",
-		        "State": "running",
-		        "Status": "Up 2 days"
-		    },
-		    {
-		        "Names": [
-		            "/control"
-		        ],
-		        "Image": "control",
-		        "Command": "/controller.sh",
-		        "State": "running",
-		        "Status": "Up 5 days"
-		    },
-		],
 		deployable: false,
-		to_deploy: ""
+		to_deploy: "",
+		running_images: []
   	};
 
-  	// this.updateMetrics()
+  	this.updateMetrics()
 	this.props.emitter.addListener('deploy', (name) => {
 		console.log(name);
 		this.setState({
@@ -86,14 +58,103 @@ export default class Device extends React.Component {
   		metrics_cpu: Math.random() * 4 - 2 + this.base_metrics_cpu,
 		metrics_mem: Math.random() * 2 - 1 + this.base_metrics_mem
   	})
-	$.get("http://"+this.props.id+"/containers/json", function(data, status) {
-		if (status == 'success') {
-			this.setState({
-				running_images: data
-			});
-			// console.log(data);
-		}
-	}.bind(this));
+	// $.get("http://"+this.props.id+"/containers/json", function(data, status) {
+	// 	if (status == 'success') {
+	// 		this.setState({
+	// 			running_images: data
+	// 		});
+	// 		// console.log(data);
+	// 	}
+	// }.bind(this));
+
+  	if (this.props.id.startsWith("edge_host")) {
+  		this.setState({
+  			running_images: [
+			    {
+			        "Names": [
+			            "/cloud_navigation"
+			        ],
+			        "Image": "cloud_navigation",
+			        "Command": "/nav.sh",
+			        "State": "running",
+			        "Status": "Up 1 hour"
+			    },
+			    {
+			        "Names": [
+			            "/monitoring"
+			        ],
+			        "Image": "monitoring",
+			        "Command": "/monitoring.sh",
+			        "State": "running",
+			        "Status": "Up 2 days"
+			    }
+			]
+  		})
+  	} else if (this.props.id.startsWith("raw") || this.props.id.startsWith("cob")) {
+  		this.setState({
+  			running_images: [
+			    {
+			        "Names": [
+			            "/local_navigation"
+			        ],
+			        "Image": "local_navigation",
+			        "Command": "/nav.sh",
+			        "State": "running",
+			        "Status": "Up 1 hour"
+			    },
+			    {
+			        "Names": [
+			            "/local_slam"
+			        ],
+			        "Image": "local_slam",
+			        "Command": "/slam.sh",
+			        "State": "running",
+			        "Status": "Up 2 days"
+			    },
+			    {
+			        "Names": [
+			            "/monitoring_agent"
+			        ],
+			        "Image": "monitoring_agent",
+			        "Command": "/monitoring.sh",
+			        "State": "running",
+			        "Status": "Up 2 days"
+			    }
+			]
+  		})
+  	} else if (this.props.id.startsWith("stationary")) {
+  		this.setState({
+  			running_images: [
+			    {
+			        "Names": [
+			            "/driver"
+			        ],
+			        "Image": "driver",
+			        "Command": "/driver.sh",
+			        "State": "running",
+			        "Status": "Up 1 hour"
+			    },
+			    {
+			        "Names": [
+			            "/laser_feed"
+			        ],
+			        "Image": "laser_feed",
+			        "Command": "/laser.sh",
+			        "State": "running",
+			        "Status": "Up 2 days"
+			    },
+			    {
+			        "Names": [
+			            "/monitoring_agent"
+			        ],
+			        "Image": "monitoring_agent",
+			        "Command": "/monitoring.sh",
+			        "State": "running",
+			        "Status": "Up 2 days"
+			    }
+			]
+  		})
+  	} 
 
   	setTimeout(this.updateMetrics.bind(this), 1000);
   }
