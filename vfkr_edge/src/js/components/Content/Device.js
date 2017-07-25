@@ -51,6 +51,10 @@ export default class Device extends React.Component {
 			to_deploy: name
 		})
 	});
+	this.props.emitter.addListener('deployed_to', (name) => {
+		// console.log(name);
+		this.setState({deployable: false})
+	});
   }
 
   updateMetrics() {
@@ -186,7 +190,25 @@ export default class Device extends React.Component {
 			<Button floating className="black" icon='fast_forward' disabled={
 				(this.state.deployable) ? (false) : (true)
 			} onClick={function() {
-				console.log(this.state.to_deploy);
+				this.props.emitter.emit('deployed_to', this.props.id);
+				Materialize.toast('Deploying ' + this.state.to_deploy + ' to ' + this.props.id, 4000);
+				new_running_images = this.state.running_images.slice()
+				new_running_images.push(
+						{
+					        "Names": [
+					            "/"+this.state.to_deploy
+					        ],
+					        "Image": this.state.to_deploy,
+					        "Command": "/delpoyed.sh",
+					        "State": "running",
+					        "Status": "Up now"
+				    	}	
+				    )
+				this.setState({
+					deployable: false,
+					to_deploy: '',
+					running_images: new_running_images
+				})
 				// $.post( "http://"+
 				// 		this.props.id+
 				// 		"/images/create?fromImage="+
