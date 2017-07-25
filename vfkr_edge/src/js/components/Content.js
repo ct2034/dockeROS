@@ -27,7 +27,7 @@ export default class Content extends React.Component {
         height: "100%",
         overflow: "hidden"
       }}>
-        <SplitPane split="vertical" defaultSize="38%">
+        <SplitPane split="vertical" defaultSize="62%">
           <div style={this.pane_style}>
             <Images emitter={this.emitter}/>
           </div>
