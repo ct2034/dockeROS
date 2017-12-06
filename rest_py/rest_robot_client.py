@@ -41,7 +41,7 @@ except:
     
 if is_mem_info == "mem":
     doc['cpu_usg'] = psutil.cpu_percent()
-    doc['ram_usg'] = psutil.virtual_memory()
+    doc['ram_usg'] = psutil.virtual_memory().percent
 
 """Writing a JSON file"""
 file_path = '/home/robotino/rosedge/rest_py/rob_config.json'

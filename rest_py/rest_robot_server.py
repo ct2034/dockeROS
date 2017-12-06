@@ -19,17 +19,25 @@ Server running on robot used for getting metric information about robot
 for displaying in GUI. The data is not stored in database
 """
 class Robmetrics(object):
+    def __init__(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(("8.8.8.8", 80))
+            self.ip = s.getsockname()[0]
+        except Exception as e:
+            print("error reaching internet")
+            self.ip = '0.0.0.0'
+        finally:
+            s.close()
     
     """Handles GET requests"""
     def on_get(self, req, resp):
         
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        doc = {'ip_add':s.getsockname()[0]}
-        doc['cpu_usg'] = psutil.cpu_percent()
-        doc['ram_usg'] = psutil.virtual_memory()
 
-        s.close()
+        doc = {'ip_add': self.ip}
+        doc['cpu_usg'] = psutil.cpu_percent()
+        doc['ram_usg'] = psutil.virtual_memory().percent
+
         resp.status = falcon.HTTP_200  # This is the default status
         resp.body = json.dumps(doc, ensure_ascii=False)
         
