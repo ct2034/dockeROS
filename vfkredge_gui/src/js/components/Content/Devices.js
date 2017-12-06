@@ -8,7 +8,7 @@ export default class Devices extends React.Component {
   constructor(props) {
 	  super(props);
 	  this.state = {
-	    ids: ["localhost:2375", "cchsim.ipa.stuttgart:2375"]
+	    ids: ["localhost", "cchsim.ipa.stuttgart"]
 	  };
 	}
 

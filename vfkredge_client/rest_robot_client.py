@@ -16,14 +16,26 @@ import sys
 def connect_server(put_ip):
     subprocess.call(put_ip, shell=True)
   
+
+"""Reading config"""
+file_path = 'rob_config.json'
+
+with open(file_path,'r') as file:
+    data = json.load(file)
+
+print(data)
+
+
 """configurable server ip"""
-server_ip = '10.2.1.10'
+server_ip = data["server_host"]
 
 var = 3
-"""Getting IP address """
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.connect(("8.8.8.8", 80))
-doc = {'ip_add':s.getsockname()[0]}
+doc = {}
+
+"""Getting my IP address """
+# s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+# s.connect((server_ip, 5005))
+# doc = {'ip_add':s.getsockname()[0]}
 
 """Getting mac address for uuid"""
 mac = get_mac()
@@ -35,7 +47,6 @@ the memory information of the robot is sent as PUT
 """
 try:
     is_mem_info = sys.argv[1]
-    
 except: 
     is_mem_info = "config"
     
@@ -43,12 +54,6 @@ if is_mem_info == "mem":
     doc['cpu_usg'] = psutil.cpu_percent()
     doc['ram_usg'] = psutil.virtual_memory().percent
 
-"""Writing a JSON file"""
-file_path = '/home/robotino/rosedge/rest_py/rob_config.json'
-file_path = '/home/cch-student/rosedge/rest_py/rob_config.json'
-
-with open(file_path,'w') as outfile:
-	json.dump(doc,outfile)
 
 """Sending Json command to Server Robot"""
 put_ip = 'http PUT ' + server_ip + ':8000/things < rob_config.json'
@@ -58,8 +63,8 @@ try:
     subprocess.call(put_ip, shell=True)
 
 except falcon.HTTP_503:
-    print "Attempting to reconnect in 10 secs.."
-    print "61!"
+    print("Attempting to reconnect in 10 secs..")
+    print("61!")
     time.sleep(10)
     #var = connect_server(put_ip)
     while var != 0:

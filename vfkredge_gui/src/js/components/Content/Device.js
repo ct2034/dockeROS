@@ -57,11 +57,25 @@ export default class Device extends React.Component {
   }
 
   updateMetrics() {
+	$.get("http://"+this.props.id+":5005/rob_metrics", function(data, status) {
+		if (status == 'success') {
+			this.setState({
+		  		metrics_cpu: data.cpu_usg,
+				metrics_mem: data.ram_usg
+		  	})
+			// console.log(data);
+		} else {
+		  	this.setState({
+		  		metrics_cpu: Math.random() * 4 - 2 + this.base_metrics_cpu,
+				metrics_mem: Math.random() * 2 - 1 + this.base_metrics_mem
+		  	})
+		}
+	}.bind(this));
   	this.setState({
   		metrics_cpu: Math.random() * 4 - 2 + this.base_metrics_cpu,
 		metrics_mem: Math.random() * 2 - 1 + this.base_metrics_mem
   	})
-	$.get("http://"+this.props.id+"/containers/json", function(data, status) {
+	$.get("http://"+this.props.id+":2375/containers/json", function(data, status) {
 		if (status == 'success') {
 			this.setState({
 				running_images: data

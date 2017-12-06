@@ -11,6 +11,7 @@ import socket
 import ast
 import datetime
 from falcon_multipart.middleware import MultipartMiddleware
+from falcon_cors import CORS
 import psutil
 import sys
 
@@ -42,7 +43,10 @@ class Robmetrics(object):
         resp.body = json.dumps(doc, ensure_ascii=False)
         
 """initializing falcon app"""
-rob = falcon.API(middleware=[MultipartMiddleware()])
+
+cors = CORS(allow_all_origins=True)
+
+rob = falcon.API(middleware=[cors.middleware])
 print("Server started successfully!")
 # Resources are represented by long-lived class instances
 rob_metrics = Robmetrics()
