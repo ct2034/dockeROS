@@ -71,10 +71,6 @@ export default class Device extends React.Component {
 		  	})
 		}
 	}.bind(this));
-  	this.setState({
-  		metrics_cpu: Math.random() * 4 - 2 + this.base_metrics_cpu,
-		metrics_mem: Math.random() * 2 - 1 + this.base_metrics_mem
-  	})
 	$.get("http://"+this.props.id+":2375/containers/json", function(data, status) {
 		if (status == 'success') {
 			this.setState({
