@@ -37,9 +37,9 @@ export default class Device extends React.Component {
     this.state = {
   		metrics_cpu: this.base_metrics_cpu,
 	    metrics_mem: this.base_metrics_mem,
-		running_images: [],
 		deployable: false,
-		to_deploy: ""
+		to_deploy: "",
+		running_images: []
   	};
 
   	this.updateMetrics()
@@ -49,6 +49,10 @@ export default class Device extends React.Component {
 			deployable: true,
 			to_deploy: name
 		})
+	});
+	this.props.emitter.addListener('deployed_to', (name) => {
+		// console.log(name);
+		this.setState({deployable: false})
 	});
   }
 
@@ -78,8 +82,8 @@ export default class Device extends React.Component {
 		}}>
 			<Bar val={this.state.metrics_cpu} name="CPU" id="1" />
 			<Bar val={this.state.metrics_mem} name="Memory" id="2" />
+			<p><b>Name</b>: {this.props.id.split(':')[0].toUpperCase()}</p> 
 			<p><b>Host</b>: {this.props.id}</p> 
-			<p><b>Name</b>: Device {this.props.id}</p> 
 			{(this.state.running_images.length == 0) ? (<p><i>No images (jet)</i></p>) : (
 				<Collapsible>
 					{this.state.running_images.map((image) =>
@@ -96,17 +100,35 @@ export default class Device extends React.Component {
 			<Button floating className="black" icon='fast_forward' disabled={
 				(this.state.deployable) ? (false) : (true)
 			} onClick={function() {
-				console.log(this.state.to_deploy);
-				$.post( "http://"+
-						this.props.id+
-						"/images/create?fromImage="+
-						this.state.to_deploy+
-						"&repo=cchpc.ipa.stuttgart:5000", 
-				function(data, status) {
-					console.log("DEPLOY");
-					console.log(status);
-					console.log(data);
-				}.bind(this));
+				this.props.emitter.emit('deployed_to', this.props.id);
+				Materialize.toast('Deploying ' + this.state.to_deploy + ' to ' + this.props.id, 4000);
+				new_running_images = this.state.running_images.slice()
+				new_running_images.push(
+						{
+					        "Names": [
+					            "/"+this.state.to_deploy
+					        ],
+					        "Image": this.state.to_deploy,
+					        "Command": "/delpoyed.sh",
+					        "State": "running",
+					        "Status": "Up now"
+				    	}	
+				    )
+				this.setState({
+					deployable: false,
+					to_deploy: '',
+					running_images: new_running_images
+				})
+				// $.post( "http://"+
+				// 		this.props.id+
+				// 		"/images/create?fromImage="+
+				// 		this.state.to_deploy+
+				// 		"&repo=cchpc.ipa.stuttgart:5000"	, 
+				// function(data, status) {
+				// 	console.log("DEPLOY");
+				// 	console.log(status);
+				// 	console.log(data);
+				// }.bind(this));
 				// $.post( "http://"+this.props.id+"/containers/create", 
 				// { 
 				// 	"Image": "cchpc.ipa.stuttgart:5000/"+this.state.to_deploy 

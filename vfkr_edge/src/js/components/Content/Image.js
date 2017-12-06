@@ -45,7 +45,11 @@ export default class Image extends React.Component {
 					this.setState({deployable: false})
 				}
 			});
-			this.update()
+			this.props.emitter.addListener('deployed_to', (name) => {
+				// console.log(name);
+				this.setState({deployable: true})
+			});
+			// this.update()
 		}
 
 		update() {
