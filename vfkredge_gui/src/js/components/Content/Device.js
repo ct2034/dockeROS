@@ -55,7 +55,7 @@ export default class Device extends React.Component {
   }
 
   updateMetrics() {
-	$.get("http://"+this.props.id+":5005/rob_metrics", function(data, status) {
+	$.get("http://"+this.props.host+":5005/rob_metrics", function(data, status) {
 		if (status == 'success') {
 			this.setState({
 		  		metrics_cpu: data.cpu_usg,
@@ -69,7 +69,7 @@ export default class Device extends React.Component {
 		  	})
 		}
 	}.bind(this));
-	$.get("http://"+this.props.obj.ip+":2375/containers/json", function(data, status) {
+	$.get("http://"+this.props.host+":2375/containers/json", function(data, status) {
 		if (status == 'success') {
 			this.setState({
 				running_images: data
@@ -90,8 +90,8 @@ export default class Device extends React.Component {
 		}}>
 			<Bar val={this.state.metrics_cpu} name="CPU" id="1" />
 			<Bar val={this.state.metrics_mem} name="Memory" id="2" />
-			<p><b>Name</b>: {this.props.obj.name}</p> 
-			<p><b>Host</b>: {this.props.obj.ip}</p> 
+			<p><b>Name</b>: {this.props.name}</p> 
+			<p><b>Host</b>: {this.props.host}</p> 
 			{(this.state.running_images.length == 0) ? (<p><i>No images (jet)</i></p>) : (
 				<Collapsible>
 					{this.state.running_images.map((image) =>
@@ -109,42 +109,25 @@ export default class Device extends React.Component {
 				(this.state.deployable) ? (false) : (true)
 			} onClick={function() {
 				this.props.emitter.emit('deployed_to', this.props.id);
-				Materialize.toast('Deploying ' + this.state.to_deploy + ' to ' + this.props.id, 4000);
-				new_running_images = this.state.running_images.slice()
-				new_running_images.push(
-						{
-					        "Names": [
-					            "/"+this.state.to_deploy
-					        ],
-					        "Image": this.state.to_deploy,
-					        "Command": "/delpoyed.sh",
-					        "State": "running",
-					        "Status": "Up now"
-				    	}	
-				    )
-				this.setState({
-					deployable: false,
-					to_deploy: '',
-					running_images: new_running_images
-				})
-				// $.post( "http://"+
-				// 		this.props.id+
-				// 		"/images/create?fromImage="+
-				// 		this.state.to_deploy+
-				// 		"&repo=cchpc.ipa.stuttgart:5000"	, 
-				// function(data, status) {
-				// 	console.log("DEPLOY");
-				// 	console.log(status);
-				// 	console.log(data);
-				// }.bind(this));
-				// $.post( "http://"+this.props.id+"/containers/create", 
-				// { 
-				// 	"Image": "cchpc.ipa.stuttgart:5000/"+this.state.to_deploy 
-				// }, function(data, status) {
-				// 	console.log("DEPLOY");
-				// 	console.log(status);
-				// 	console.log(data);
-				// }.bind(this));
+				Materialize.toast('Deploying ' + this.state.to_deploy + ' to ' + this.props.name, 4000);	
+				$.post( "http://"+
+						this.props.id+
+						":2375/images/create?fromImage="+
+						this.state.to_deploy+
+						"&repo=cchpc.ipa.stuttgart:5000"	, 
+				function(data, status) {
+					console.log("DEPLOY");
+					console.log(status);
+					console.log(data);
+				}.bind(this));
+				$.post( "http://"+this.props.id+":2375/containers/create", 
+				{ 
+					"Image": "cchpc.ipa.stuttgart:5000/"+this.state.to_deploy 
+				}, function(data, status) {
+					console.log("DEPLOY");
+					console.log(status);
+					console.log(data);
+				}.bind(this));
 			}.bind(this)}
 			style={{
 			    position: "absolute",

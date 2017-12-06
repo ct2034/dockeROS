@@ -39,7 +39,7 @@ export default class Devices extends React.Component {
           <div key={id} style={{
             flex: 1
           }}>
-            <Device id={id} obj={this.state.ids[id]} emitter={this.props.emitter} />
+            <Device id={id} name={this.state.ids[id].name} host={this.state.ids[id].ip} emitter={this.props.emitter} />
           </div>)}
         }
       </div>
