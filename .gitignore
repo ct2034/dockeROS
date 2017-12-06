@@ -100,3 +100,4 @@ ENV/
 # mypy
 .mypy_cache/
 *.sublime-*
+vfkredge_client/rob_config.json
