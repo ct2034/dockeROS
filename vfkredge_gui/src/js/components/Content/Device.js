@@ -32,11 +32,9 @@ function collect(connect, monitor) {
 export default class Device extends React.Component {
   constructor(props) {
     super(props);
-  	this.base_metrics_cpu = Math.random() * 20 + 15
-  	this.base_metrics_mem = Math.random() * 30 + 40
     this.state = {
-  		metrics_cpu: this.base_metrics_cpu,
-	    metrics_mem: this.base_metrics_mem,
+  		metrics_cpu: 0,
+	    metrics_mem: 0,
 		deployable: false,
 		to_deploy: "",
 		running_images: []
@@ -71,7 +69,7 @@ export default class Device extends React.Component {
 		  	})
 		}
 	}.bind(this));
-	$.get("http://"+this.props.id+":2375/containers/json", function(data, status) {
+	$.get("http://"+this.props.obj.ip+":2375/containers/json", function(data, status) {
 		if (status == 'success') {
 			this.setState({
 				running_images: data
@@ -92,8 +90,8 @@ export default class Device extends React.Component {
 		}}>
 			<Bar val={this.state.metrics_cpu} name="CPU" id="1" />
 			<Bar val={this.state.metrics_mem} name="Memory" id="2" />
-			<p><b>Name</b>: {this.props.id.split(':')[0].toUpperCase()}</p> 
-			<p><b>Host</b>: {this.props.id}</p> 
+			<p><b>Name</b>: {this.props.obj.name}</p> 
+			<p><b>Host</b>: {this.props.obj.ip}</p> 
 			{(this.state.running_images.length == 0) ? (<p><i>No images (jet)</i></p>) : (
 				<Collapsible>
 					{this.state.running_images.map((image) =>

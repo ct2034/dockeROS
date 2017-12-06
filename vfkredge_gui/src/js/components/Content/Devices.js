@@ -8,13 +8,25 @@ export default class Devices extends React.Component {
   constructor(props) {
 	  super(props);
 	  this.state = {
-	    ids: ["localhost", "cchsim.ipa.stuttgart"]
+	    ids: {}
 	  };
+    this.update()
 	}
 
-  render() {
-  	const ids = this.state.ids
+  update() {
+    $.get("http://localhost:5004/clients", function(data, status) {
+      if (status == 'success') {
+        this.setState({
+          ids: data
+        })
+        // console.log(data);
+      }
+    }.bind(this));
+  }
 
+  render() {
+  	const ids = Object.keys(this.state.ids)
+    // console.log(ids)
     return (
       <div style={{
             display: "flex",
@@ -27,8 +39,9 @@ export default class Devices extends React.Component {
           <div key={id} style={{
             flex: 1
           }}>
-            <Device id={id} emitter={this.props.emitter} />
+            <Device id={id} obj={this.state.ids[id]} emitter={this.props.emitter} />
           </div>)}
+        }
       </div>
     )
   }

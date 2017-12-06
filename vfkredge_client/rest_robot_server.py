@@ -37,7 +37,7 @@ class Robmetrics(object):
         r = requests.put(
             'http://'+
             self.config["server_host"]+
-            ':5004/things', 
+            ':5004/clients', 
             data=json.dumps(self.register_data))
         print(r.status_code)
 
