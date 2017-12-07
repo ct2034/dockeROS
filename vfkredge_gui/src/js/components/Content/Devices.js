@@ -22,6 +22,8 @@ export default class Devices extends React.Component {
         // console.log(data);
       }
     }.bind(this));
+
+    setTimeout(this.update.bind(this), 1000);
   }
 
   render() {
@@ -40,7 +42,7 @@ export default class Devices extends React.Component {
             flex: 1
           }}>
             <Device id={id} name={this.state.ids[id].name} host={this.state.ids[id].ip} emitter={this.props.emitter} />
-          </div>)}
+          </div>)
         }
       </div>
     )

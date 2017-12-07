@@ -5,6 +5,7 @@ Created on Wed Jun 21 15:30:15 2017
 @author: cch-student
 """
 
+import docker
 import falcon
 import json
 import socket
@@ -60,6 +61,19 @@ class Robmetrics(object):
         resp.body = json.dumps(doc, ensure_ascii=False)
 
 
+class Images(object):
+    def __init__(self):
+        self.docker_client = docker.from_env()
+
+    def on_get(self, req, resp):
+        containers = self.docker_client.images.list(all=True)
+        print(containers)
+        resp.status = falcon.HTTP_200  # This is the default status
+        resp.body = json.dumps(doc, ensure_ascii=False)
+    
+
+
+
 """initializing falcon app"""
 cors = CORS(allow_all_origins=True)
 api = falcon.API(middleware=[cors.middleware])
@@ -67,3 +81,4 @@ print("Server started successfully!")
 # Resources are represented by long-lived class instances
 rob_metrics = Robmetrics()
 api.add_route('/rob_metrics', rob_metrics)
+api.add_route('/images', images)
