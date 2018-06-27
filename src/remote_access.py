@@ -14,9 +14,17 @@ else:
 
 usage = "USAGE:\n" + \
         "," * 80 + "\n" \
-        "$ dockeROS <HOST:PORT> roslaunch ros_naviagtion move_base.launch\n" \
-        "Will perform the roslaunch command in a docker container at the mentioned IP\n" + \
+        "$ dockeROS <build/run> <IP:Port> roslaunch ros_naviagtion move_base.launch\n" \
+        "Will perform the ros command in a docker container at the mentioned IP\n" + \
         "'" * 80 + "\n" \
+
+def dummy():
+    print("to be implemented ..")
+
+commands = {
+    "build": dummy,
+    "run": dummy
+}
 
 def subprocess_cmd(command):
     process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
@@ -24,49 +32,52 @@ def subprocess_cmd(command):
     print(proc_stdout)
 
 try:
-    ipwhl = sys.argv[1]
-    host = ipwhl.split(':')[0]
-    port = ipwhl.split(':')[1]
+    command = sys.argv[1]
+    if not command in commands.keys():
+        raise Exception()
+except:
+    print(usage)
+    print("No valid command")
+    exit()
+
+try:
+    ip_and_port = sys.argv[2]
+    ip = ip_and_port.split(':')[0]
+    port = ip_and_port.split(':')[1]
 except:
     print(usage)
     print("Host and/or port not entered! exiting script")
     exit()
 
 try:
-    roscommand = sys.argv[2]
+    roscommand = sys.argv[3:]
 except:
     print(usage)
     print("Ros command not entered! exiting script")
     exit()
 
-try:
-    rospackage = sys.argv[3]
-except:
-    print(usage)
-    print("Ros package name not entered! exiting script")
-    exit()
-
-try:
-    roslaunchfile = sys.argv[4]
-except:
-    print(usage)
-    print("Ros launch file name not entered! exiting script")
-    exit()
-
-print("ROS command to be executed:\n > " + " ".join([roscommand, rospackage, roslaunchfile]))
-print("On Server:\n > " + ':'.join([host,port]))
+print("ROS command to be executed:\n > " + " ".join([roscommand]))
+print("On Server:\n > " + ':'.join([ip, port]))
 
 rp = rospkg.RosPack()
-fname = rp.get_path('dockeROS') + '/config.yaml'
+fname = rp.get_path('dockeros') + '/config.yaml'
 config = yaml.load(open(fname))
-dock_obj = remote_access_base.RemoteDock(host, port,
-                                         ' '.join([roscommand, rospackage, roslaunchfile]),
+dock_obj = remote_access_base.RemoteDock(ip, port,
+                                         ' '.join(roscommand),
                                          config=config,
                                          ca_cert='/home/cch/.docker/ca.pem')
+
+commands["build"] = dock_obj.build_docker_image
+commands["run"] = dock_obj.run_docker_image
+
+try:
+    commands[command]()
+except Exception as e:
+    print("Failed to execute command")
+    print(e)
+    exit()
+
+
 # if not dock_obj.does_exist_on_client():
 # else:
 #     dock_obj.run_existing_image()
-
-
-dock_obj.build_docker_image()
-dock_obj.run_docker_image()
