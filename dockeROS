@@ -1,2 +1,0 @@
-#!/bin/bash
-python2 src/remote_access.py $@

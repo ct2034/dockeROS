@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Feb  8 09:44:45 2017
-
-@author: Poulastya_Mukherjee
-"""
-
 import subprocess
 import sys
 import remote_access_base
