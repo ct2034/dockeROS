@@ -21,7 +21,7 @@ else:
 
 usage = "USAGE:\n" + \
         "," * 80 + "\n" \
-        "$ rosedge <HOST:PORT> roslaunch ros_naviagtion move_base.launch\n" \
+        "$ dockeROS <HOST:PORT> roslaunch ros_naviagtion move_base.launch\n" \
         "Will perform the roslaunch command in a docker container at the mentioned IP\n" + \
         "'" * 80 + "\n" \
 
@@ -64,7 +64,7 @@ print("ROS command to be executed:\n > " + " ".join([roscommand, rospackage, ros
 print("On Server:\n > " + ':'.join([host,port]))
 
 rp = rospkg.RosPack()
-fname = rp.get_path('rosedge') + '/config.yaml'
+fname = rp.get_path('dockeROS') + '/config.yaml'
 config = yaml.load(open(fname))
 dock_obj = remote_access_base.RemoteDock(host, port,
                                          ' '.join([roscommand, rospackage, roslaunchfile]),

@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Feb  8 09:44:45 2017
-
-@author: Poulastya_Mukherjee
-"""
-
 import os
 import socket
 import subprocess
@@ -39,7 +32,7 @@ def compare(str1, str2):
         md5 checksum algorithm
         Args:
             str1 (str): 1st string
-            str1 (str): 2nd string      
+            str1 (str): 2nd string
     """
     m1 = hashlib.md5()
     m2 = hashlib.md5()
@@ -131,7 +124,7 @@ class RemoteDock():
         print(json.dumps(config, indent=2))
         print("\n")
         self.path = rp.get_path(self.rospackage)
-        self.rosedge_path = rp.get_path('rosedge')
+        self.dockeros_path = rp.get_path('dockeros')
         if self.path.startswith('/opt/ros'):
             print('This is a system package at:\n> ' + self.path)
             self.user_package = False
@@ -147,9 +140,9 @@ class RemoteDock():
                 break
         if not self.dockerfile:
             if self.user_package:
-                self.dockerfile = self.rosedge_path + '/source_Dockerfile'
+                self.dockerfile = self.dockeros_path + '/source_Dockerfile'
             else:  # system package
-                self.dockerfile = self.rosedge_path + '/default_Dockerfile'
+                self.dockerfile = self.dockeros_path + '/default_Dockerfile'
             print('Using default Dockerfile:\n> ' + self.dockerfile)
 
         registry_string = config['registry']['host'] + \
