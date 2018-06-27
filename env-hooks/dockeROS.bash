@@ -7,9 +7,13 @@ function dockeROS() {
     shift
     python2 $package/src/remote_access.py build $@
     ;;
-  l|launch)
+  r|run)
     shift
-    python2 $package/src/remote_access.py build $@
+    python2 $package/src/remote_access.py run $@
+    ;;
+  p|push)
+    shift
+    python2 $package/src/remote_access.py push $@
     ;;
   *)
     python2 $package/src/remote_access.py
@@ -31,7 +35,11 @@ function complete_dockeROS() {
       shift
       echo "to be implemented"
       ;;
-    l|launch)
+    r|run)
+      shift
+      echo "to be implemented"
+      ;;
+    p|push)
       shift
       echo "to be implemented"
       ;;

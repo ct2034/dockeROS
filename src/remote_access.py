@@ -23,7 +23,8 @@ def dummy():
 
 commands = {
     "build": dummy,
-    "run": dummy
+    "run": dummy,
+    "push": dummy
 }
 
 def subprocess_cmd(command):
@@ -40,21 +41,30 @@ except:
     print("No valid command")
     exit()
 
-try:
-    ip_and_port = sys.argv[2]
-    ip = ip_and_port.split(':')[0]
-    port = ip_and_port.split(':')[1]
-except:
-    print(usage)
-    print("Host and/or port not entered! exiting script")
-    exit()
+if command == "build":  # no ip needed
+    try:
+        roscommand = sys.argv[2:]
+    except:
+        print(usage)
+        print("Ros command not entered! exiting script")
+        exit()
 
-try:
-    roscommand = sys.argv[3:]
-except:
-    print(usage)
-    print("Ros command not entered! exiting script")
-    exit()
+else:  # ip needed
+    try:
+        ip_and_port = sys.argv[2]
+        ip = ip_and_port.split(':')[0]
+        port = ip_and_port.split(':')[1]
+    except:
+        print(usage)
+        print("Host and/or port not entered! exiting script")
+        exit()
+
+    try:
+        roscommand = sys.argv[3:]
+    except:
+        print(usage)
+        print("Ros command not entered! exiting script")
+        exit()
 
 print("ROS command to be executed:\n > " + " ".join([roscommand]))
 print("On Server:\n > " + ':'.join([ip, port]))
