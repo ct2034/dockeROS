@@ -49,7 +49,7 @@ if command == "build":  # no ip needed
         port = ""
     except:
         rospy.loginfo(usage)
-        rospy.logerror("Ros command not entered! exiting script")
+        rospy.logerr("Ros command not entered! exiting script")
         exit()
 
 else:  # ip needed
@@ -59,14 +59,14 @@ else:  # ip needed
         port = ip_and_port.split(':')[1]
     except:
         rospy.loginfo(usage)
-        rospy.logerror("Host and/or port not entered! exiting script")
+        rospy.logerr("Host and/or port not entered! exiting script")
         exit()
 
     try:
         roscommand = sys.argv[3:]
     except:
         rospy.loginfo(usage)
-        rospy.logerror("Ros command not entered! exiting script")
+        rospy.logerr("Ros command not entered! exiting script")
         exit()
 
 rp = rospkg.RosPack()
@@ -83,8 +83,8 @@ commands["run"] = dock_obj.run_docker_image
 try:
     commands[command]()
 except Exception as e:
-    rospy.logerror("Failed to execute command")
-    rospy.logerror(e)
+    rospy.logerr("Failed to execute command")
+    rospy.logerr(e)
     exit()
 
 
