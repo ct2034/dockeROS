@@ -11,6 +11,7 @@ import json
 
 import logging
 import rospkg
+import rosdep2
 import sys
 from debug_print import debug_eval_print
 from shutil import copyfile
@@ -186,7 +187,7 @@ class DockeROSImage():
         image_names = map(lambda i: i.tags[0], images)
         return self.name in image_names
 
-    def build_docker_image(self):
+    def build_image(self):
         """
         Compiles a baseDocker image with specific image of a rospackage
         """
@@ -196,15 +197,17 @@ class DockeROSImage():
         # client = docker.from_env()
         # res = client.images.build(path=self.path,
         #                           tag=self.name,
+        #                           dockerfile=self.dockerfile,
         #                           buildargs={
         #                               "PACKAGE": self.rospackage
-        #                           }
+        #                             }
         #                           )
         # logging.info(res)
 
         cli = docker.APIClient(base_url='unix://var/run/docker.sock')
         it = cli.build(path=self.path,
                        tag=self.name + ":" + self.tag,
+                       dockerfile=self.dockerfile,
                        buildargs={
                            "PACKAGE": self.rospackage
                        },

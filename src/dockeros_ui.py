@@ -75,7 +75,7 @@ dock_obj = dockerosimage.DockeROSImage(ip, port,
                                        roscommand,
                                        config=config)
 
-commands["build"] = dock_obj.build_docker_image
+commands["build"] = dock_obj.build_image
 commands["run"] = dock_obj.run_image
 
 try:
