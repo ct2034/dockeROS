@@ -5,7 +5,7 @@ import logging
 import yaml
 import rospkg
 
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger('root').setLevel(logging.DEBUG)
 if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
     from debug_print import debug_eval_print
 else:
