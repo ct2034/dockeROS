@@ -1,4 +1,5 @@
 import os
+import re
 import socket
 import subprocess
 import threading
@@ -105,21 +106,24 @@ class RemoteDock():
         self.ip = ip
         self.port = port
         self.ip_str = "tcp://" + self.ip + ":" + self.port
-        self.tls = docker.tls.TLSConfig(ca_cert=ca_cert) if ca_cert else False
-        self.docker_client = docker.DockerClient(self.ip_str, tls=self.tls)
+        self.ca_cert = ca_cert
+
         # Version info
         rospy.info("Python Version: " + sys.version)
         rospy.info("docker-py Version: " + docker.__version__)
+
         # What is the ros command?
         command = roscommand.split(' ')
         if command[0] in RemoteDock.allowed_roscommands:
             self.roscommand = command[0]
         else:
             raise NotImplementedError(
-                'The ros command >' + command[0] + '< is currently not supported.')
+                'The ros command >' + command[0] + '< is currently not supported.'
+            )
         self.rospackage = command[1]
-        self.roslaunchfile = command[2]
-        # What is the image name going to be?
+        self.roscommand_args = command[2:]
+
+        # Where is the package?
         rp = rospkg.RosPack()
         rospy.info("\nThe config is:")
         rospy.info(json.dumps(config, indent=2))
@@ -132,10 +136,12 @@ class RemoteDock():
         else:
             rospy.info('This is a user package at:\n> ' + self.path)
             self.user_package = True
+
+        # What Dockerfile should be used?
         self.dockerfile = None
         for f in os.walk(self.path):
             fname = f[0]
-            if fname.endswith('/Dockerfile'):
+            if re.match(r"\/.*Dockerfile.*", fname):
                 self.dockerfile = fname
                 rospy.info('This package has a Dockerfile at:\n> ' + self.dockerfile)
                 break
@@ -146,18 +152,26 @@ class RemoteDock():
                 self.dockerfile = self.dockeros_path + '/default_Dockerfile'
             rospy.info('Using default Dockerfile:\n> ' + self.dockerfile)
 
+        # What is the image name going to be?
         registry_string = config['registry']['host'] + \
                           ':' + str(config['registry']['port']) + '/'
         self.name = registry_string + \
                     '_'.join(command).replace('.', '_')
         self.tag = str(path_checksum(self.path))
-
         rospy.info("The name of the image will be: \n> " + self.name)
+
+    def connect(self):
+        """
+        Connect to configured docker host
+        """
+        self.tls = docker.tls.TLSConfig(ca_cert=self.ca_cert) if self.ca_cert else False
+        self.docker_client = docker.DockerClient(self.ip_str, tls=self.tls)
 
     def does_exist_on_client(self):
         """
         Checks whether a similar image exists or not
         """
+        self.connect()
         images = self.docker_client.images.list()
         rospy.info("Currently available images:")
         rospy.info("image_names")

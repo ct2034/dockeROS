@@ -27,7 +27,7 @@ function complete_dockeROS() {
 
   case "${COMP_CWORD}" in
 	1)
-    COMPREPLY=( $(compgen -W "b build l launch" -- $cur) )
+    COMPREPLY=( $(compgen -W "b build r run p push" -- $cur) )
     ;;
 	2)
     case "${cmd}" in
