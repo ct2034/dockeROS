@@ -100,8 +100,8 @@ class DockeROSImage():
             roslaunchfile (str) : the specific ros file to be run
 
         Example:
-            >>> import dockerrosimage
-            >>> obj = dockerrosimage.DockeROSImage(image, ip, port, roscommand, ca_cert)
+            >>> import dockerosimage
+            >>> obj = dockerosimage.DockeROSImage(image, ip, port, roscommand, ca_cert)
         ..  >>> obj.build_docker_image()
         ..  >>> obj.build_docker_image()
     """
@@ -116,10 +116,11 @@ class DockeROSImage():
         self.ca_cert = ca_cert
 
         # Version info
-        logging.info("Python Version: " + sys.version)
-        logging.info("docker-py Version: " + docker.__version__)
+        logging.info("Python Version: " + sys.version + "\ndocker (library) Version: " + docker.__version__)
 
         # What is the ros command?
+        assert(isinstance(roscommand, list), "roscommand should be a list")
+        assert(isinstance(roscommand[0], str), "roscommand should be a list of strings")
         self.roscommand = roscommand
         if roscommand[0] in DockeROSImage.allowed_roscommands:
             self.roscommand = roscommand[0]
@@ -132,9 +133,7 @@ class DockeROSImage():
 
         # Where is the package?
         rp = rospkg.RosPack()
-        logging.info("\nThe config is:")
-        logging.info(json.dumps(config, indent=2))
-        logging.info("\n")
+        logging.info("The config is:\n"+json.dumps(config, indent=2))
         self.path = rp.get_path(self.rospackage)
         self.dockeros_path = rp.get_path('dockeros')
         if self.path.startswith('/opt/ros'):
@@ -163,7 +162,7 @@ class DockeROSImage():
         registry_string = config['registry']['host'] + \
                           ':' + str(config['registry']['port']) + '/'
         self.name = registry_string + \
-                    '_'.join(self.roscommand).replace('.', '-')
+                    self.roscommand.replace('.', '-').replace(' ', '_')
         self.tag = str(path_checksum(self.path))
         logging.info("The name of the image will be: \n> " + self.name)
 
@@ -236,7 +235,7 @@ class DockeROSImage():
                 logging.info(ld["stream"].strip())
 
     def run_image(self):
-        logging.info("ROS command to be executed:\n > " + " ".join(self.roscommand))
+        logging.info("ROS command to be executed:\n > " + self.roscommand)
         logging.info("On Server:\n > " + ':'.join([self.ip, self.port]))
 
     def push_image(self):

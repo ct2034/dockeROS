@@ -73,8 +73,7 @@ fname = rp.get_path('dockeros') + '/config.yaml'
 config = yaml.load(open(fname))
 dock_obj = dockerosimage.DockeROSImage(ip, port,
                                        roscommand,
-                                       config=config,
-                                       ca_cert='/home/cch/.docker/ca.pem')
+                                       config=config)
 
 commands["build"] = dock_obj.build_docker_image
 commands["run"] = dock_obj.run_image
