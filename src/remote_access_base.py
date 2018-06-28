@@ -112,15 +112,15 @@ class RemoteDock():
         logging.info("docker-py Version: " + docker.__version__)
 
         # What is the ros command?
-        command = roscommand.split(' ')
-        if command[0] in RemoteDock.allowed_roscommands:
-            self.roscommand = command[0]
+        self.roscommand = roscommand
+        if roscommand[0] in RemoteDock.allowed_roscommands:
+            self.roscommand = roscommand[0]
         else:
             raise NotImplementedError(
-                'The ros command >' + command[0] + '< is currently not supported.'
+                'The ros command >' + roscommand[0] + '< is currently not supported.'
             )
-        self.rospackage = command[1]
-        self.roscommand_args = command[2:]
+        self.rospackage = roscommand[1]
+        self.roscommand_args = roscommand[2:]
 
         # Where is the package?
         rp = rospkg.RosPack()
@@ -155,7 +155,7 @@ class RemoteDock():
         registry_string = config['registry']['host'] + \
                           ':' + str(config['registry']['port']) + '/'
         self.name = registry_string + \
-                    '_'.join(command).replace('.', '_')
+                    '_'.join(self.roscommand).replace('.', '-')
         self.tag = str(path_checksum(self.path))
         logging.info("The name of the image will be: \n> " + self.name)
 
