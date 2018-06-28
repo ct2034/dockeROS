@@ -20,7 +20,7 @@ usage = "USAGE:\n" + \
         "'" * 80 + "\n" \
 
 def dummy():
-    rospy.info("to be implemented ..")
+    rospy.loginfo("to be implemented ..")
 
 commands = {
     "build": dummy,
@@ -31,14 +31,14 @@ commands = {
 def subprocess_cmd(command):
     process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
     proc_stdout = process.communicate()[0].strip()
-    rospy.info(proc_stdout)
+    rospy.loginfo(proc_stdout)
 
 try:
     command = sys.argv[1]
     if not command in commands.keys():
         raise Exception()
 except:
-    rospy.info(usage)
+    rospy.loginfo(usage)
     rospy.error("No valid command")
     exit()
 
@@ -48,7 +48,7 @@ if command == "build":  # no ip needed
         ip = ""
         port = ""
     except:
-        rospy.info(usage)
+        rospy.loginfo(usage)
         rospy.error("Ros command not entered! exiting script")
         exit()
 
@@ -58,15 +58,15 @@ else:  # ip needed
         ip = ip_and_port.split(':')[0]
         port = ip_and_port.split(':')[1]
     except:
-        rospy.info(usage)
+        rospy.loginfo(usage)
         rospy.error("Host and/or port not entered! exiting script")
         exit()
 
     try:
         roscommand = sys.argv[3:]
     except:
-        rospy.info(usage)
-        rospy.error("Ros command not entered! exiting script")
+        rospy.loginfo(usage)
+        rospy.logerror("Ros command not entered! exiting script")
         exit()
 
 rp = rospkg.RosPack()
@@ -83,8 +83,8 @@ commands["run"] = dock_obj.run_docker_image
 try:
     commands[command]()
 except Exception as e:
-    rospy.error("Failed to execute command")
-    rospy.error(e)
+    rospy.logerror("Failed to execute command")
+    rospy.logerror(e)
     exit()
 
 
