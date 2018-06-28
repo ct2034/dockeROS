@@ -15,6 +15,13 @@ import sys
 from debug_print import debug_eval_print
 from shutil import copyfile
 
+logging.getLogger('root').setLevel(logging.DEBUG)
+if logging.getLogger('root').getEffectiveLevel() == logging.DEBUG:
+    from debug_print import debug_eval_print
+else:
+    def debug_eval_print(_):
+        pass
+
 
 class MltThrd(threading.Thread):
     def __init__(self, cmd, queue):
