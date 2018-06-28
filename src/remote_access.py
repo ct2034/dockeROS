@@ -44,6 +44,8 @@ except:
 if command == "build":  # no ip needed
     try:
         roscommand = sys.argv[2:]
+        ip = ""
+        port = ""
     except:
         print(usage)
         print("Ros command not entered! exiting script")
@@ -66,14 +68,14 @@ else:  # ip needed
         print("Ros command not entered! exiting script")
         exit()
 
-print("ROS command to be executed:\n > " + " ".join([roscommand]))
+print("ROS command to be executed:\n > " + roscommand))
 print("On Server:\n > " + ':'.join([ip, port]))
 
 rp = rospkg.RosPack()
 fname = rp.get_path('dockeros') + '/config.yaml'
 config = yaml.load(open(fname))
 dock_obj = remote_access_base.RemoteDock(ip, port,
-                                         ' '.join(roscommand),
+                                         roscommand,
                                          config=config,
                                          ca_cert='/home/cch/.docker/ca.pem')
 

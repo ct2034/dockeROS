@@ -167,8 +167,7 @@ class RemoteDock():
 
     def build_docker_image(self):
         """
-        Compiles a baseDocker image with specific image of a rospackage and 
-        deploys the built image on the server
+        Compiles a baseDocker image with specific image of a rospackage 
         """
         print(self.path)
         copyfile(self.dockerfile, self.path + '/Dockerfile')
@@ -213,3 +212,6 @@ class RemoteDock():
             ld = eval(l)
             if ld.__class__ == dict and "stream" in ld.keys():
                 print(ld["stream"].strip())
+
+    def push_image(self):
+        print("to be implemented")
