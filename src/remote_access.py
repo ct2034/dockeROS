@@ -68,7 +68,7 @@ else:  # ip needed
         print("Ros command not entered! exiting script")
         exit()
 
-print("ROS command to be executed:\n > " + roscommand))
+print("ROS command to be executed:\n > " + roscommand)
 print("On Server:\n > " + ':'.join([ip, port]))
 
 rp = rospkg.RosPack()

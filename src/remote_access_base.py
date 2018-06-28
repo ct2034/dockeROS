@@ -167,7 +167,7 @@ class RemoteDock():
 
     def build_docker_image(self):
         """
-        Compiles a baseDocker image with specific image of a rospackage 
+        Compiles a baseDocker image with specific image of a rospackage
         """
         print(self.path)
         copyfile(self.dockerfile, self.path + '/Dockerfile')
