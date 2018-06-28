@@ -4,7 +4,6 @@ import remote_access_base
 import logging
 import yaml
 import rospkg
-import rospy
 
 logging.getLogger('root').setLevel(logging.DEBUG)
 if logging.getLogger('root').getEffectiveLevel() == logging.DEBUG:
@@ -20,7 +19,7 @@ usage = "USAGE:\n" + \
         "'" * 80 + "\n" \
 
 def dummy():
-    rospy.loginfo("to be implemented ..")
+    logging.info("to be implemented ..")
 
 commands = {
     "build": dummy,
@@ -31,14 +30,14 @@ commands = {
 def subprocess_cmd(command):
     process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
     proc_stdout = process.communicate()[0].strip()
-    rospy.loginfo(proc_stdout)
+    logging.info(proc_stdout)
 
 try:
     command = sys.argv[1]
     if not command in commands.keys():
         raise Exception()
 except:
-    rospy.loginfo(usage)
+    logging.info(usage)
     rospy.error("No valid command")
     exit()
 
@@ -48,8 +47,8 @@ if command == "build":  # no ip needed
         ip = ""
         port = ""
     except:
-        rospy.loginfo(usage)
-        rospy.logerr("Ros command not entered! exiting script")
+        logging.info(usage)
+        logging.error("Ros command not entered! exiting script")
         exit()
 
 else:  # ip needed
@@ -58,15 +57,15 @@ else:  # ip needed
         ip = ip_and_port.split(':')[0]
         port = ip_and_port.split(':')[1]
     except:
-        rospy.loginfo(usage)
-        rospy.logerr("Host and/or port not entered! exiting script")
+        logging.info(usage)
+        logging.error("Host and/or port not entered! exiting script")
         exit()
 
     try:
         roscommand = sys.argv[3:]
     except:
-        rospy.loginfo(usage)
-        rospy.logerr("Ros command not entered! exiting script")
+        logging.info(usage)
+        logging.error("Ros command not entered! exiting script")
         exit()
 
 rp = rospkg.RosPack()
@@ -83,8 +82,8 @@ commands["run"] = dock_obj.run_docker_image
 try:
     commands[command]()
 except Exception as e:
-    rospy.logerr("Failed to execute command")
-    rospy.logerr(e)
+    logging.error("Failed to execute command")
+    logging.error(e)
     exit()
 
 

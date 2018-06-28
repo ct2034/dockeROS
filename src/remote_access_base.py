@@ -11,7 +11,6 @@ import json
 
 import logging
 import rospkg
-import rospy
 import sys
 from debug_print import debug_eval_print
 from shutil import copyfile
@@ -125,16 +124,16 @@ class RemoteDock():
 
         # Where is the package?
         rp = rospkg.RosPack()
-        rospy.loginfo("\nThe config is:")
-        rospy.loginfo(json.dumps(config, indent=2))
-        rospy.loginfo("\n")
+        logging.info("\nThe config is:")
+        logging.info(json.dumps(config, indent=2))
+        logging.info("\n")
         self.path = rp.get_path(self.rospackage)
         self.dockeros_path = rp.get_path('dockeros')
         if self.path.startswith('/opt/ros'):
-            rospy.loginfo('This is a system package at:\n> ' + self.path)
+            logging.info('This is a system package at:\n> ' + self.path)
             self.user_package = False
         else:
-            rospy.loginfo('This is a user package at:\n> ' + self.path)
+            logging.info('This is a user package at:\n> ' + self.path)
             self.user_package = True
 
         # What Dockerfile should be used?
@@ -143,14 +142,14 @@ class RemoteDock():
             fname = f[0]
             if re.match(r"\/.*Dockerfile.*", fname):
                 self.dockerfile = fname
-                rospy.loginfo('This package has a Dockerfile at:\n> ' + self.dockerfile)
+                logging.info('This package has a Dockerfile at:\n> ' + self.dockerfile)
                 break
         if not self.dockerfile:
             if self.user_package:
                 self.dockerfile = self.dockeros_path + '/source_Dockerfile'
             else:  # system package
                 self.dockerfile = self.dockeros_path + '/default_Dockerfile'
-            rospy.loginfo('Using default Dockerfile:\n> ' + self.dockerfile)
+            logging.info('Using default Dockerfile:\n> ' + self.dockerfile)
 
         # What is the image name going to be?
         registry_string = config['registry']['host'] + \
@@ -158,7 +157,7 @@ class RemoteDock():
         self.name = registry_string + \
                     '_'.join(command).replace('.', '_')
         self.tag = str(path_checksum(self.path))
-        rospy.loginfo("The name of the image will be: \n> " + self.name)
+        logging.info("The name of the image will be: \n> " + self.name)
 
     def connect(self):
         """
@@ -173,10 +172,10 @@ class RemoteDock():
         """
         self.connect()
         images = self.docker_client.images.list()
-        rospy.loginfo("Currently available images:")
-        rospy.loginfo("image_names")
+        logging.info("Currently available images:")
+        logging.info("image_names")
         for image in images:
-            rospy.loginfo(image)
+            logging.info(image)
         # image_names = map(lambda i: i.tags[0], images)
         return self.name in image_names
 
@@ -184,7 +183,7 @@ class RemoteDock():
         """
         Compiles a baseDocker image with specific image of a rospackage
         """
-        rospy.loginfo(self.path)
+        logging.info(self.path)
         copyfile(self.dockerfile, self.path + '/Dockerfile')
 
         # client = docker.from_env()
@@ -194,7 +193,7 @@ class RemoteDock():
         #                               "PACKAGE": self.rospackage
         #                           }
         #                           )
-        # rospy.loginfo(res)
+        # logging.info(res)
 
         cli = docker.APIClient(base_url='unix://var/run/docker.sock')
         it = cli.build(path=self.path,
@@ -210,7 +209,7 @@ class RemoteDock():
         for l in it:
             ld = eval(l)
             if ld.__class__ == dict and "stream" in ld.keys():
-                rospy.loginfo(ld["stream"].strip())
+                logging.info(ld["stream"].strip())
 
         # Tag as latest (rebuild ?!?)
         it = cli.build(path=self.path,
@@ -226,11 +225,11 @@ class RemoteDock():
         for l in it:
             ld = eval(l)
             if ld.__class__ == dict and "stream" in ld.keys():
-                rospy.loginfo(ld["stream"].strip())
+                logging.info(ld["stream"].strip())
 
     def run_docker_image(self):
-        rospy.loginfo("ROS command to be executed:\n > " + " ".join(self.roscommand))
-        rospy.loginfo("On Server:\n > " + ':'.join([self.ip, self.port]))
+        logging.info("ROS command to be executed:\n > " + " ".join(self.roscommand))
+        logging.info("On Server:\n > " + ':'.join([self.ip, self.port]))
 
     def push_image(self):
-        rospy.loginfo("to be implemented")
+        logging.info("to be implemented")
