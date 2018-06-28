@@ -49,7 +49,7 @@ if command == "build":  # no ip needed
         port = ""
     except:
         rospy.loginfo(usage)
-        rospy.error("Ros command not entered! exiting script")
+        rospy.logerror("Ros command not entered! exiting script")
         exit()
 
 else:  # ip needed
@@ -59,7 +59,7 @@ else:  # ip needed
         port = ip_and_port.split(':')[1]
     except:
         rospy.loginfo(usage)
-        rospy.error("Host and/or port not entered! exiting script")
+        rospy.logerror("Host and/or port not entered! exiting script")
         exit()
 
     try:
