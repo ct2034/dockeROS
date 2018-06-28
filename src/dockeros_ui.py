@@ -38,7 +38,7 @@ try:
         raise Exception()
 except:
     logging.info(usage)
-    rospy.error("No valid command")
+    logging.error("No valid command")
     exit()
 
 if command == "build":  # no ip needed
@@ -83,6 +83,7 @@ try:
 except Exception as e:
     logging.error("Failed to execute command")
     logging.error(e)
+    raise e
     exit()
 
 

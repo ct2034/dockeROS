@@ -15,8 +15,9 @@ import rosdep2
 import sys
 from debug_print import debug_eval_print
 from shutil import copyfile
+import subprocess
 
-logging.getLogger('root').setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.DEBUG)
 if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
     from debug_print import debug_eval_print
 else:
@@ -120,38 +121,51 @@ class DockeROSImage():
         logging.info("Python Version: " + sys.version + "\ndocker (library) Version: " + docker.__version__)
 
         # What is the ros command?
-        assert(isinstance(roscommand, list), "roscommand should be a list")
-        assert(isinstance(roscommand[0], str), "roscommand should be a list of strings")
+        assert isinstance(roscommand, list), "roscommand should be a list"
+        assert isinstance(roscommand[0], str), "roscommand should be a list of strings"
         self.roscommand = roscommand
         if roscommand[0] in DockeROSImage.allowed_roscommands:
-            self.roscommand = roscommand[0]
+            self.roscommand = roscommand[:]
+            self.rospackage = roscommand[1]
         else:
             raise NotImplementedError(
                 'The ros command >' + roscommand[0] + '< is currently not supported.'
             )
-        self.rospackage = roscommand[1]
-        self.roscommand_args = roscommand[2:]
 
         # Where is the package?
         rp = rospkg.RosPack()
         logging.info("The config is:\n"+json.dumps(config, indent=2))
-        self.path = rp.get_path(self.rospackage)
         self.dockeros_path = rp.get_path('dockeros')
-        if self.path.startswith('/opt/ros'):
-            logging.info('This is a system package at:\n> ' + self.path)
-            self.user_package = False
-        else:
-            logging.info('This is a user package at:\n> ' + self.path)
-            self.user_package = True
+
+        self.path = None
+        try:
+            self.path = rp.get_path(self.rospackage)
+        except rospkg.common.ResourceNotFound as e:
+            try:
+                self.check_rosdep()
+                logging.info('This is a system package to be installed from:\n> ' + self.deb_package)
+                self.user_package = False
+            except:
+                raise e
+
+        if self.path: # on systemS
+            if self.path.startswith('/opt/ros'):
+                self.check_rosdep()
+                logging.info('This is a system package to be installed from:\n> ' + self.deb_package)
+                self.user_package = False
+            else:
+                logging.info('This is a user package at:\n> ' + self.path)
+                self.user_package = True
 
         # What Dockerfile should be used?
         self.dockerfile = None
-        for f in os.walk(self.path):
-            fname = f[0]
-            if re.match(r"\/.*Dockerfile.*", fname):
-                self.dockerfile = fname
-                logging.info('This package has a Dockerfile at:\n> ' + self.dockerfile)
-                break
+        if self.path:
+            for f in os.walk(self.path):
+                fname = f[0]
+                if re.match(r"\/.*Dockerfile.*", fname):
+                    self.dockerfile = fname
+                    logging.info('This package has a Dockerfile at:\n> ' + self.dockerfile)
+                    break
         if not self.dockerfile:
             if self.user_package:
                 self.dockerfile = self.dockeros_path + '/source_Dockerfile'
@@ -163,9 +177,21 @@ class DockeROSImage():
         registry_string = config['registry']['host'] + \
                           ':' + str(config['registry']['port']) + '/'
         self.name = registry_string + \
-                    self.roscommand.replace('.', '-').replace(' ', '_')
-        self.tag = str(path_checksum(self.path))
+                    "_".join(self.roscommand).replace('.', '-')
+        if self.path:
+            self.tag = str(path_checksum(self.path))
+        else:
+            self.tag = "latest"
         logging.info("The name of the image will be: \n> " + self.name)
+
+    def check_rosdep(self):
+        out = subprocess.check_output(
+            " ".join(
+                ["source", "/opt/ros/kinetic/setup.bash;", "rosdep", "resolve", self.rospackage, "--os=ubuntu:xenial"]),
+            # TODO: dynamic os definition
+            shell=True)
+        logging.debug(out)
+        self.deb_package = out.split("\n")[1].strip()
 
     def connect(self):
         """
@@ -204,22 +230,53 @@ class DockeROSImage():
         #                           )
         # logging.info(res)
 
-        cli = docker.APIClient(base_url='unix://var/run/docker.sock')
-        it = cli.build(path=self.path,
-                       tag=self.name + ":" + self.tag,
-                       dockerfile=self.dockerfile,
-                       buildargs={
-                           "PACKAGE": self.rospackage
-                       },
-                       labels={
-                           "label_a": "1",
-                           "label_b": "2"
-                       }
-                       )
-        for l in it:
-            ld = eval(l)
-            if ld.__class__ == dict and "stream" in ld.keys():
-                logging.info(ld["stream"].strip())
+        if self.user_package:
+            try:
+                f = open(self.dockerfile, 'r')
+                cli = docker.APIClient(base_url='unix://var/run/docker.sock')
+                it = cli.build(path=self.path,
+                               tag=self.name + ":" + self.tag,
+                               dockerfile=self.dockerfile,
+                               buildargs={
+                                   "PACKAGE": self.rospackage
+                               },
+                               labels={
+                                   "label_a": "1",
+                                   "label_b": "2"
+                               }
+                               )
+                for l in it:
+                    ld = eval(l)
+                    if ld.__class__ == dict and "stream" in ld.keys():
+                        logging.info(ld["stream"].strip())
+            except Exception  as e:
+                logging.error("Exception during building:" + str(e))
+            finally:
+                f.close()
+        else:
+            assert self.deb_package, "Debian package needs to be available"
+            try:
+                f = open(self.dockerfile, 'r')
+                dockerfile = ""
+                for l in f:
+                    l.replace("#####DEB_PACKAGE#####", self.deb_package).replace("#####CMD#####", self.roscommand)
+                    dockerfile += l
+                cli = docker.APIClient(base_url='unix://var/run/docker.sock')
+                it = cli.build(tag=self.name + ":" + self.tag,
+                               fileobj=dockerfile,
+                               labels={
+                                   "label_a": "1",
+                                   "label_b": "2"
+                               }
+                               )
+                for l in it:
+                    ld = eval(l)
+                    if ld.__class__ == dict and "stream" in ld.keys():
+                        logging.info(ld["stream"].strip())
+            except Exception  as e:
+                logging.error("Exception during building:" + str(e))
+            finally:
+                f.close()
 
         # Tag as latest (rebuild ?!?)
         it = cli.build(path=self.path,
