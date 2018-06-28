@@ -4,6 +4,7 @@ import remote_access_base
 import logging
 import yaml
 import rospkg
+import rospy
 
 logging.getLogger('root').setLevel(logging.DEBUG)
 if logging.getLogger('root').getEffectiveLevel() == logging.DEBUG:
@@ -19,7 +20,7 @@ usage = "USAGE:\n" + \
         "'" * 80 + "\n" \
 
 def dummy():
-    print("to be implemented ..")
+    rospy.info("to be implemented ..")
 
 commands = {
     "build": dummy,
@@ -30,15 +31,15 @@ commands = {
 def subprocess_cmd(command):
     process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
     proc_stdout = process.communicate()[0].strip()
-    print(proc_stdout)
+    rospy.info(proc_stdout)
 
 try:
     command = sys.argv[1]
     if not command in commands.keys():
         raise Exception()
 except:
-    print(usage)
-    print("No valid command")
+    rospy.info(usage)
+    rospy.error("No valid command")
     exit()
 
 if command == "build":  # no ip needed
@@ -47,8 +48,8 @@ if command == "build":  # no ip needed
         ip = ""
         port = ""
     except:
-        print(usage)
-        print("Ros command not entered! exiting script")
+        rospy.info(usage)
+        rospy.error("Ros command not entered! exiting script")
         exit()
 
 else:  # ip needed
@@ -57,19 +58,16 @@ else:  # ip needed
         ip = ip_and_port.split(':')[0]
         port = ip_and_port.split(':')[1]
     except:
-        print(usage)
-        print("Host and/or port not entered! exiting script")
+        rospy.info(usage)
+        rospy.error("Host and/or port not entered! exiting script")
         exit()
 
     try:
         roscommand = sys.argv[3:]
     except:
-        print(usage)
-        print("Ros command not entered! exiting script")
+        rospy.info(usage)
+        rospy.error("Ros command not entered! exiting script")
         exit()
-
-print("ROS command to be executed:\n > " + " ".join(roscommand))
-print("On Server:\n > " + ':'.join([ip, port]))
 
 rp = rospkg.RosPack()
 fname = rp.get_path('dockeros') + '/config.yaml'
@@ -85,8 +83,8 @@ commands["run"] = dock_obj.run_docker_image
 try:
     commands[command]()
 except Exception as e:
-    print("Failed to execute command")
-    print(e)
+    rospy.error("Failed to execute command")
+    rospy.error(e)
     exit()
 
 

@@ -10,6 +10,7 @@ import json
 
 import logging
 import rospkg
+import rospy
 import sys
 from debug_print import debug_eval_print
 from shutil import copyfile
@@ -107,8 +108,8 @@ class RemoteDock():
         self.tls = docker.tls.TLSConfig(ca_cert=ca_cert) if ca_cert else False
         self.docker_client = docker.DockerClient(self.ip_str, tls=self.tls)
         # Version info
-        print("Python Version: " + sys.version)
-        print("docker-py Version: " + docker.__version__)
+        rospy.info("Python Version: " + sys.version)
+        rospy.info("docker-py Version: " + docker.__version__)
         # What is the ros command?
         command = roscommand.split(' ')
         if command[0] in RemoteDock.allowed_roscommands:
@@ -120,30 +121,30 @@ class RemoteDock():
         self.roslaunchfile = command[2]
         # What is the image name going to be?
         rp = rospkg.RosPack()
-        print("\nThe config is:")
-        print(json.dumps(config, indent=2))
-        print("\n")
+        rospy.info("\nThe config is:")
+        rospy.info(json.dumps(config, indent=2))
+        rospy.info("\n")
         self.path = rp.get_path(self.rospackage)
         self.dockeros_path = rp.get_path('dockeros')
         if self.path.startswith('/opt/ros'):
-            print('This is a system package at:\n> ' + self.path)
+            rospy.info('This is a system package at:\n> ' + self.path)
             self.user_package = False
         else:
-            print('This is a user package at:\n> ' + self.path)
+            rospy.info('This is a user package at:\n> ' + self.path)
             self.user_package = True
         self.dockerfile = None
         for f in os.walk(self.path):
             fname = f[0]
             if fname.endswith('/Dockerfile'):
                 self.dockerfile = fname
-                print('This package has a Dockerfile at:\n> ' + self.dockerfile)
+                rospy.info('This package has a Dockerfile at:\n> ' + self.dockerfile)
                 break
         if not self.dockerfile:
             if self.user_package:
                 self.dockerfile = self.dockeros_path + '/source_Dockerfile'
             else:  # system package
                 self.dockerfile = self.dockeros_path + '/default_Dockerfile'
-            print('Using default Dockerfile:\n> ' + self.dockerfile)
+            rospy.info('Using default Dockerfile:\n> ' + self.dockerfile)
 
         registry_string = config['registry']['host'] + \
                           ':' + str(config['registry']['port']) + '/'
@@ -151,17 +152,17 @@ class RemoteDock():
                     '_'.join(command).replace('.', '_')
         self.tag = str(path_checksum(self.path))
 
-        print("The name of the image will be: \n> " + self.name)
+        rospy.info("The name of the image will be: \n> " + self.name)
 
     def does_exist_on_client(self):
         """
         Checks whether a similar image exists or not
         """
         images = self.docker_client.images.list()
-        print("Currently available images:")
-        print("image_names")
+        rospy.info("Currently available images:")
+        rospy.info("image_names")
         for image in images:
-            print(image)
+            rospy.info(image)
         # image_names = map(lambda i: i.tags[0], images)
         return self.name in image_names
 
@@ -169,7 +170,7 @@ class RemoteDock():
         """
         Compiles a baseDocker image with specific image of a rospackage
         """
-        print(self.path)
+        rospy.info(self.path)
         copyfile(self.dockerfile, self.path + '/Dockerfile')
 
         # client = docker.from_env()
@@ -179,7 +180,7 @@ class RemoteDock():
         #                               "PACKAGE": self.rospackage
         #                           }
         #                           )
-        # print(res)
+        # rospy.info(res)
 
         cli = docker.APIClient(base_url='unix://var/run/docker.sock')
         it = cli.build(path=self.path,
@@ -195,7 +196,7 @@ class RemoteDock():
         for l in it:
             ld = eval(l)
             if ld.__class__ == dict and "stream" in ld.keys():
-                print(ld["stream"].strip())
+                rospy.info(ld["stream"].strip())
 
         # Tag as latest (rebuild ?!?)
         it = cli.build(path=self.path,
@@ -211,7 +212,11 @@ class RemoteDock():
         for l in it:
             ld = eval(l)
             if ld.__class__ == dict and "stream" in ld.keys():
-                print(ld["stream"].strip())
+                rospy.info(ld["stream"].strip())
+
+    def run_docker_image(self):
+        rospy.info("ROS command to be executed:\n > " + " ".join(self.roscommand))
+        rospy.info("On Server:\n > " + ':'.join([self.ip, self.port]))
 
     def push_image(self):
-        print("to be implemented")
+        rospy.info("to be implemented")
