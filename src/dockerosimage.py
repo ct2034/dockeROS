@@ -107,7 +107,7 @@ class DockeROSImage():
         ..  >>> obj.build_docker_image()
     """
 
-    allowed_roscommands = ['roslaunch']
+    allowed_roscommands = ['roslaunch', 'rosrun']
 
     def __init__(self, ip, port, roscommand, config, ca_cert=None):
         # how to reach the client?
