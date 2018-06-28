@@ -217,23 +217,10 @@ class DockeROSImage():
         """
         Compiles a baseDocker image with specific image of a rospackage
         """
-        logging.info(self.path)
-        copyfile(self.dockerfile, self.path + '/Dockerfile')
-
-        # client = docker.from_env()
-        # res = client.images.build(path=self.path,
-        #                           tag=self.name,
-        #                           dockerfile=self.dockerfile,
-        #                           buildargs={
-        #                               "PACKAGE": self.rospackage
-        #                             }
-        #                           )
-        # logging.info(res)
-
+        cli = docker.APIClient(base_url='unix://var/run/docker.sock')
         if self.user_package:
             try:
                 f = open(self.dockerfile, 'r')
-                cli = docker.APIClient(base_url='unix://var/run/docker.sock')
                 it = cli.build(path=self.path,
                                tag=self.name + ":" + self.tag,
                                dockerfile=self.dockerfile,
@@ -259,11 +246,10 @@ class DockeROSImage():
                 f = open(self.dockerfile, 'r')
                 dockerfile = ""
                 for l in f:
-                    l.replace("#####DEB_PACKAGE#####", self.deb_package).replace("#####CMD#####", self.roscommand)
-                    dockerfile += l
-                cli = docker.APIClient(base_url='unix://var/run/docker.sock')
-                it = cli.build(tag=self.name + ":" + self.tag,
-                               fileobj=dockerfile,
+                    l2 = l.replace("#####DEB_PACKAGE#####", self.deb_package).replace("#####CMD#####", self.roscommand)
+                    dockerfile += l2
+                it = cli.build(fileobj=dockerfile,
+                               tag=self.name + ":" + self.tag,
                                labels={
                                    "label_a": "1",
                                    "label_b": "2"
