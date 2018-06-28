@@ -108,8 +108,8 @@ class RemoteDock():
         self.ca_cert = ca_cert
 
         # Version info
-        rospy.info("Python Version: " + sys.version)
-        rospy.info("docker-py Version: " + docker.__version__)
+        logging.info("Python Version: " + sys.version)
+        logging.info("docker-py Version: " + docker.__version__)
 
         # What is the ros command?
         command = roscommand.split(' ')
