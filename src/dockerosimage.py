@@ -15,8 +15,8 @@ import sys
 from debug_print import debug_eval_print
 from shutil import copyfile
 
-logging.getLogger('root').setLevel(logging.DEBUG)
-if logging.getLogger('root').getEffectiveLevel() == logging.DEBUG:
+logging.getLogger().setLevel(logging.DEBUG)
+if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
     from debug_print import debug_eval_print
 else:
     def debug_eval_print(_):
@@ -86,7 +86,7 @@ def path_checksum(this_path):
     return chksum.hexdigest()
 
 
-class RemoteDock():
+class DockeROSImage():
     """
         Remotely deploys a docker container with a user specified image of a 
         rospackage
@@ -100,9 +100,10 @@ class RemoteDock():
             roslaunchfile (str) : the specific ros file to be run
 
         Example:
-            >>> import remote_access_base
-            >>> obj = remlib.RemoteDock(image, ip, port, roscommand, rospackage, roslaunchfile, ca_cert)
-        ..  >>> obj.startcheck()
+            >>> import dockerrosimage
+            >>> obj = dockerrosimage.DockeROSImage(image, ip, port, roscommand, ca_cert)
+        ..  >>> obj.build_docker_image()
+        ..  >>> obj.build_docker_image()
     """
 
     allowed_roscommands = ['roslaunch']
@@ -120,7 +121,7 @@ class RemoteDock():
 
         # What is the ros command?
         self.roscommand = roscommand
-        if roscommand[0] in RemoteDock.allowed_roscommands:
+        if roscommand[0] in DockeROSImage.allowed_roscommands:
             self.roscommand = roscommand[0]
         else:
             raise NotImplementedError(
@@ -183,7 +184,7 @@ class RemoteDock():
         logging.info("image_names")
         for image in images:
             logging.info(image)
-        # image_names = map(lambda i: i.tags[0], images)
+        image_names = map(lambda i: i.tags[0], images)
         return self.name in image_names
 
     def build_docker_image(self):
@@ -234,7 +235,7 @@ class RemoteDock():
             if ld.__class__ == dict and "stream" in ld.keys():
                 logging.info(ld["stream"].strip())
 
-    def run_docker_image(self):
+    def run_image(self):
         logging.info("ROS command to be executed:\n > " + " ".join(self.roscommand))
         logging.info("On Server:\n > " + ':'.join([self.ip, self.port]))
 

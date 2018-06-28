@@ -1,12 +1,12 @@
 import subprocess
 import sys
-import remote_access_base
+import dockerosimage
 import logging
 import yaml
 import rospkg
 
-logging.getLogger('root').setLevel(logging.DEBUG)
-if logging.getLogger('root').getEffectiveLevel() == logging.DEBUG:
+logging.getLogger().setLevel(logging.DEBUG)
+if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
     from debug_print import debug_eval_print
 else:
     def debug_eval_print(_):
@@ -71,13 +71,13 @@ else:  # ip needed
 rp = rospkg.RosPack()
 fname = rp.get_path('dockeros') + '/config.yaml'
 config = yaml.load(open(fname))
-dock_obj = remote_access_base.RemoteDock(ip, port,
-                                         roscommand,
-                                         config=config,
-                                         ca_cert='/home/cch/.docker/ca.pem')
+dock_obj = dockerosimage.DockeROSImage(ip, port,
+                                       roscommand,
+                                       config=config,
+                                       ca_cert='/home/cch/.docker/ca.pem')
 
 commands["build"] = dock_obj.build_docker_image
-commands["run"] = dock_obj.run_docker_image
+commands["run"] = dock_obj.run_image
 
 try:
     commands[command]()
