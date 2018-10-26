@@ -105,20 +105,16 @@ class DockeROSImage():
             roslaunchfile (str) : the specific ros file to be run
 
         Example:
-            >>> import dockerosimage
-            >>> obj = dockerosimage.DockeROSImage(image, ip, port, roscommand, ca_cert)
+            >>> import image
+            >>> obj = image.DockeROSImage(image, ip, port, roscommand, ca_cert)
         ..  >>> obj.build_docker_image()
         ..  >>> obj.build_docker_image()
     """
 
     allowed_roscommands = ['roslaunch', 'rosrun']
 
-    def __init__(self, ip, port, roscommand, config, ca_cert=None):
+    def __init__(self, roscommand, config):
         # how to reach the client?
-        self.ip = ip
-        self.port = port
-        self.ip_str = "tcp://" + self.ip + ":" + self.port
-        self.ca_cert = ca_cert
 
         # Version info
         logging.info("Python Version: " + sys.version + "\ndocker (library) Version: " + docker.__version__)
@@ -196,10 +192,14 @@ class DockeROSImage():
         logging.debug(out)
         self.deb_package = out.split("\n")[1].strip()
 
-    def connect(self):
+    def connect(self, ip, port, ca_cert=None):
         """
         Connect to configured docker host
         """
+        self.ip = ip
+        self.port = port
+        self.ip_str = "tcp://" + self.ip + ":" + self.port
+        self.ca_cert = ca_cert
         self.tls = docker.tls.TLSConfig(ca_cert=self.ca_cert) if self.ca_cert else False
         self.docker_client = docker.DockerClient(self.ip_str, tls=self.tls)
 

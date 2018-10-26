@@ -1,13 +1,13 @@
 import subprocess
 import sys
-import dockerosimage
+import image
 import logging
 import yaml
 import rospkg
 
 logging.getLogger('root').setLevel(logging.DEBUG)
 if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
-    from debug_print import debug_eval_print
+    pass
 else:
     def debug_eval_print(_):
         pass
@@ -71,9 +71,9 @@ else:  # ip needed
 rp = rospkg.RosPack()
 fname = rp.get_path('dockeros') + '/config.yaml'
 config = yaml.load(open(fname))
-dock_obj = dockerosimage.DockeROSImage(ip, port,
-                                       roscommand,
-                                       config=config)
+dock_obj = image.DockeROSImage(ip, port,
+                               roscommand,
+                               config=config)
 
 commands["build"] = dock_obj.build_image
 commands["run"] = dock_obj.run_image
