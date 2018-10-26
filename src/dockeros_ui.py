@@ -78,13 +78,13 @@ dock_obj = dockerosimage.DockeROSImage(ip, port,
 commands["build"] = dock_obj.build_image
 commands["run"] = dock_obj.run_image
 
-try:
+if 1:
     commands[command]()
-except Exception as e:
-    logging.error("Failed to execute command")
-    logging.error(e)
-    raise e
-    exit()
+# except Exception as e:
+#     logging.error("Failed to execute command")
+#     logging.error(e)
+#     raise e
+#     exit()
 
 
 # if not dock_obj.does_exist_on_client():

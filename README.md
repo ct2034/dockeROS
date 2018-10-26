@@ -1,4 +1,4 @@
-# ros*edge*
+# docke*ROS*
 Simply running ros nodes in docker containers on remote robots.
 
 ## Idea

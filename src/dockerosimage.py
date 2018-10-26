@@ -4,6 +4,9 @@ import socket
 import subprocess
 import threading
 import hashlib
+from StringIO import StringIO
+from io import FileIO
+
 import docker
 import shutil
 from os import path
@@ -220,7 +223,7 @@ class DockeROSImage():
         cli = docker.APIClient(base_url='unix://var/run/docker.sock')
         if self.user_package:
             try:
-                f = open(self.dockerfile, 'r')
+                in_file = open(self.dockerfile, 'r')
                 it = cli.build(path=self.path,
                                tag=self.name + ":" + self.tag,
                                dockerfile=self.dockerfile,
@@ -239,30 +242,36 @@ class DockeROSImage():
             except Exception  as e:
                 logging.error("Exception during building:" + str(e))
             finally:
-                f.close()
+                in_file.close()
         else:
             assert self.deb_package, "Debian package needs to be available"
-            try:
-                f = open(self.dockerfile, 'r')
-                dockerfile = ""
-                for l in f:
-                    l2 = l.replace("#####DEB_PACKAGE#####", self.deb_package).replace("#####CMD#####", self.roscommand)
-                    dockerfile += l2
-                it = cli.build(fileobj=dockerfile,
-                               tag=self.name + ":" + self.tag,
-                               labels={
-                                   "label_a": "1",
-                                   "label_b": "2"
-                               }
-                               )
+            if True:
+                in_file = open(self.dockerfile, 'r')
+
+                out_file = FileIO('/tmp/tmp_Dockerfile', 'w+')
+                out_file.seek(0)
+                out_file.truncate()
+                for l in in_file:
+                    l = l.replace("#####DEB_PACKAGE#####", self.deb_package)
+                    l = l.replace("#####CMD#####", "[\""+"\", \"".join(self.roscommand)+"\"]")
+                    out_file.write(l)
+                out_file.seek(0)
+                for l in out_file:
+                    print l
+                it = cli.build(
+                    fileobj=out_file,
+                    custom_context=True,
+                    tag=self.name + ":" + self.tag
+                    )
                 for l in it:
                     ld = eval(l)
                     if ld.__class__ == dict and "stream" in ld.keys():
                         logging.info(ld["stream"].strip())
-            except Exception  as e:
-                logging.error("Exception during building:" + str(e))
-            finally:
-                f.close()
+            # except Exception  as e:
+            #     logging.error("Exception during building:" + str(e))
+            # finally:
+            #     in_file.close()
+            #     out_file.close()
 
         # Tag as latest (rebuild ?!?)
         it = cli.build(path=self.path,
