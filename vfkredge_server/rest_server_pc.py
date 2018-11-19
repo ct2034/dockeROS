@@ -22,6 +22,7 @@ class Robconnect(object):
         self.clients.update(
             self.read_manual_clients()
         )
+        print(self.clients)
 
     """Handles GET requests"""
 

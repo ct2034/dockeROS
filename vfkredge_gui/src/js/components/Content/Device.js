@@ -2,9 +2,9 @@ import React from "react";
 
 import {
 	Button,
-	Card, 
-	Col, 
-	Collapsible, 
+	Card,
+	Col,
+	Collapsible,
 	CollapsibleItem
 } from "react-materialize";
 import PropTypes from 'prop-types';
@@ -90,44 +90,59 @@ export default class Device extends React.Component {
 		}}>
 			<Bar val={this.state.metrics_cpu} name="CPU" id="1" />
 			<Bar val={this.state.metrics_mem} name="Memory" id="2" />
-			<p><b>Name</b>: {this.props.name}</p> 
-			<p><b>Host</b>: {this.props.host}</p> 
+			<p><b>Name</b>: {this.props.name}</p>
+			<p><b>Host</b>: {this.props.host}</p>
 			{(this.state.running_images.length == 0) ? (<p><i>No images (jet)</i></p>) : (
 				<Collapsible>
 					{this.state.running_images.map((image) =>
-						(<CollapsibleItem header={image["Names"][0]} key={image["Names"][0]} 
+						(<CollapsibleItem header={image["Names"][0]} key={image["Names"][0]}
 							icon={(image["State"] == "running") ? 'play_circle_filled' : 'pause_circle_filled'}>
-							<RunningImage name={image["Names"][0]} 
-							image={image["Image"]} 
+							<RunningImage name={image["Names"][0]}
+							image={image["Image"]}
 							command={image["Command"]}
-							status={image["Status"]} />
+							status={image["Status"]}
+							host={this.props.host} />
 						</CollapsibleItem>)
-						)}	
+						)}
 				</Collapsible>
 			)}
 			<Button floating className="black" icon='fast_forward' disabled={
 				(this.state.deployable) ? (false) : (true)
 			} onClick={function() {
 				this.props.emitter.emit('deployed_to', this.props.id);
-				Materialize.toast('Deploying ' + this.state.to_deploy + ' to ' + this.props.name, 4000);	
-				$.post( "http://"+
-						this.props.id+
-						":2375/images/create?fromImage="+
-						this.state.to_deploy+
-						"&repo=cchpc.ipa.stuttgart:5000"	, 
-				function(data, status) {
-					console.log("DEPLOY");
-					console.log(status);
-					console.log(data);
-				}.bind(this));
-				$.post( "http://"+this.props.id+":2375/containers/create", 
-				{ 
-					"Image": "cchpc.ipa.stuttgart:5000/"+this.state.to_deploy 
-				}, function(data, status) {
-					console.log("DEPLOY");
-					console.log(status);
-					console.log(data);
-				}.bind(this));
+				Materialize.toast('Deploying ' + this.state.to_deploy + ' to ' + this.props.name, 4000);
+				$.ajax({
+					type: "POST",
+					url: "http://"+this.props.id+":2375/containers/create?name="+this.state.to_deploy,
+					data: JSON.stringify({
+						"Image": "space:5000/"+this.state.to_deploy
+					}),
+					success: function(data, status) {
+						console.log("DEPLOY");
+						console.log(status);
+						console.log(data);
+						$.ajax({
+							type: "POST",
+							url: "http://"+this.props.id+":2375/containers/"+this.state.to_deploy+"/start",
+							data: JSON.stringify({}),
+							success: function(data, status) {
+								console.log("START");
+								console.log(status);
+								console.log(data);
+							}.bind(this),
+						  error: function(e) {
+								console.log("START");
+						    console.log(e);
+						  }.bind(this)
+						});
+					}.bind(this),
+				  error: function(e) {
+						console.log("DEPLOY");
+				    console.log(e)
+				  }.bind(this),
+					dataType: "json",
+  				contentType: "application/json"
+				});
 			}.bind(this)}
 			style={{
 			    position: "absolute",
