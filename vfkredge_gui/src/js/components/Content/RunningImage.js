@@ -25,14 +25,13 @@ export default class RunningImage extends React.Component {
 						height: 38
 					}}
 					onClick={function() {
-						console.log("DELETE");
-						console.log(this.props.name);
+					  Materialize.toast('Stopping ' + this.props.name, 4000);
 						$.ajax({
 							type: "POST",
-							url: "http://"+this.props.host+":2375/containers"+this.props.name+"/stop",
+							url: "http://"+this.props.host+":2375/containers"+this.props.name+"/kill",
 							data: JSON.stringify({}),
 							success: function(data, status) {
-								console.log("STOP");
+								console.log("KILL");
 								console.log(status);
 								console.log(data);
 								$.ajax({
@@ -45,13 +44,13 @@ export default class RunningImage extends React.Component {
 										console.log(data);
 									}.bind(this),
 								  error: function(e) {
-										console.log("DELETE");
+										console.log("DELETE error");
 								    console.log(e);
 								  }.bind(this)
 								});
 							}.bind(this),
 						  error: function(e) {
-								console.log("STOP");
+								console.log("KILL error");
 						    console.log(e);
 						  }.bind(this)
 						});
