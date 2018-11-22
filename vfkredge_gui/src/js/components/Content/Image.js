@@ -53,14 +53,14 @@ export default class Image extends React.Component {
 		}
 
 		update() {
-			$.get("http://localhost:5000/v2/"+this.props.name+"/tags/list", function(data, status) {
+			$.get("http://192.168.10.101:5000/v2/"+this.props.name+"/tags/list", function(data, status) {
 				if (status == 'success') {
 					this.setState({
 						tags: data['tags']
 					});
 				}
 			}.bind(this));
-			$.get("http://localhost:5000/v2/"+this.props.name+"/manifests/latest", function(data, status) {
+			$.get("http://192.168.10.101:5000/v2/"+this.props.name+"/manifests/latest", function(data, status) {
 				if (status == 'success') {
 					const architecture = JSON.parse(data)["architecture"]
 					this.setState({
@@ -73,8 +73,8 @@ export default class Image extends React.Component {
 		}
 
 		getContent() {
-			return ([ 
-				< p key = "name" > < b > Name< /b>: {this.props.name} < /p > , 
+			return ([
+				< p key = "name" > < b > Name< /b>: {this.props.name} < /p > ,
 				< p key = "architecture" > < b > Architecture< /b>: {this.state.architecture} < /p > ,
 				< div key = "tags" > < b > Tags< /b>: {
 					this.state.tags.map((tag) => <div style={{
@@ -116,7 +116,7 @@ export default class Image extends React.Component {
 								overflowWrap: "break-word",
 								background: 'var(--vfkr-orange)'
 							}
-						} > 
+						} >
 							< img src={(name.startsWith("ros")) ? "ros.png" : "app.png"} alt="ROS Logo" height="30" width="30" style={{
 								marginBottom: "6px"
 							}}/> {

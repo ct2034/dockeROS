@@ -15,7 +15,7 @@ export default class Images extends React.Component {
   }
 
   update() {
-    $.get("http://localhost:5000/v2/_catalog", function(data, status){
+    $.get("http://192.168.10.101:5000/v2/_catalog", function(data, status){
         if (status == 'success') {
           this.setState({names: data['repositories']});
         }
@@ -32,9 +32,9 @@ export default class Images extends React.Component {
             display: "flex",
             flexWrap: "wrap",
             flexFlow: "row wrap"
-          }}> 
+          }}>
         {
-          names.map((name) => 
+          names.map((name) =>
           <div key={name} style={{
             flex: 1
           }}>

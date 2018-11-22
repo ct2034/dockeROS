@@ -61,7 +61,7 @@ export default class Device extends React.Component {
 		  		metrics_cpu: data.cpu_usg,
 				metrics_mem: data.ram_usg
 		  	})
-			// console.log(data);
+			//console.log(data);
 		} else {
 		  	this.setState({
 		  		metrics_cpu: Math.random() * 4 - 2 + this.base_metrics_cpu,
@@ -74,7 +74,12 @@ export default class Device extends React.Component {
 			this.setState({
 				running_images: data
 			});
-			// console.log(data);
+			console.log("running_images")
+			console.log(data);
+		} else {
+		  	this.setState({
+		  		running_images: ['laser_node']
+		  	})
 		}
 	}.bind(this));
 
@@ -92,19 +97,33 @@ export default class Device extends React.Component {
 			<Bar val={this.state.metrics_mem} name="Memory" id="2" />
 			<p><b>Name</b>: {this.props.name}</p>
 			<p><b>Host</b>: {this.props.host}</p>
-			{(this.state.running_images.length == 0) ? (<p><i>No images (jet)</i></p>) : (
+
+			{(this.props.name == "lidar") ? (
 				<Collapsible>
-					{this.state.running_images.map((image) =>
-						(<CollapsibleItem header={image["Names"][0]} key={image["Names"][0]}
-							icon={(image["State"] == "running") ? 'play_circle_filled' : 'pause_circle_filled'}>
-							<RunningImage name={image["Names"][0]}
-							image={image["Image"]}
-							command={image["Command"]}
-							status={image["Status"]}
-							host={this.props.host} />
-						</CollapsibleItem>)
-						)}
+					<CollapsibleItem header="lidar" key="lidar"
+							icon='play_circle_filled'>
+							<RunningImage name="lidar"
+							image="/sick_lidar"
+							command="/run.sh"
+							status="up"
+							host='localhost' />
+						</CollapsibleItem>
 				</Collapsible>
+			) : (
+				(this.state.running_images.length == 0) ? (<p><i>No images (yet)</i></p>) : (
+					<Collapsible>
+						{this.state.running_images.map((image) =>
+							(<CollapsibleItem header={image["Names"][0]} key={image["Names"][0]}
+								icon={(image["State"] == "running") ? 'play_circle_filled' : 'pause_circle_filled'}>
+								<RunningImage name={image["Names"][0]}
+								image={image["Image"]}
+								command={image["Command"]}
+								status={image["Status"]}
+								host={this.props.host} />
+							</CollapsibleItem>)
+							)}
+					</Collapsible>
+				)
 			)}
 			<Button floating className="black" icon='fast_forward' disabled={
 				(this.state.deployable) ? (false) : (true)

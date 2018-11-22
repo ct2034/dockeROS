@@ -14,12 +14,12 @@ export default class Devices extends React.Component {
 	}
 
   update() {
-    $.get("http://localhost:5004/clients", function(data, status) {
+    $.get("http://192.168.10.101:5004/clients", function(data, status) {
       if (status == 'success') {
         this.setState({
           ids: data
         })
-        // console.log(data);
+        console.log(data);
       }
     }.bind(this));
 
@@ -35,9 +35,9 @@ export default class Devices extends React.Component {
             flexWrap: "wrap",
             flexFlow: "row wrap",
             alignItems: "flex-start"
-          }}> 
+          }}>
         {
-          ids.map((id) => 
+          ids.map((id) =>
           <div key={id} style={{
             flex: 1
           }}>

@@ -41,6 +41,7 @@ class Robconnect(object):
         print("tmpv")
         print(tmpv)
         self.clients.update({tmpv['ip']: tmpv})
+        # self.clients.update({'192.168.10.20': {'ip:': '192.168.10.20', 'name': 'scanner'}})
         print("clients")
         print(self.clients)
         print("_________")
