@@ -5,18 +5,18 @@ function dockeROS() {
   case $1 in
   b|build)
     shift
-    python2 $package/src/dockeros_ui.py build $@
+    python2 $package/src/dockeros/cli.py build $@
     ;;
   r|run)
     shift
-    python2 $package/src/dockeros_ui.py run $@
+    python2 $package/src/dockeros/cli.py run $@
     ;;
   p|push)
     shift
-    python2 $package/src/dockeros_ui.py push $@
+    python2 $package/src/dockeros/cli.py push $@
     ;;
   *)
-    python2 $package/src/dockeros_ui.py
+    python2 $package/src/dockeros/cli.py
     ;;
   esac
 }

@@ -71,8 +71,7 @@ else:  # ip needed
 rp = rospkg.RosPack()
 fname = rp.get_path('dockeros') + '/config.yaml'
 config = yaml.load(open(fname))
-dock_obj = image.DockeROSImage(ip, port,
-                               roscommand,
+dock_obj = image.DockeROSImage(roscommand,
                                config=config)
 
 commands["build"] = dock_obj.build_image
