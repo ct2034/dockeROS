@@ -16,14 +16,14 @@ import logging
 import rospkg
 import rosdep2
 import sys
-from debug_print import debug_eval_print
 from shutil import copyfile
 import subprocess
 
 logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger("docker").setLevel(logging.INFO)
 if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
-    from debug_print import debug_eval_print
+    def debug_eval_print(a):
+        print(a)
 else:
     def debug_eval_print(_):
         pass
