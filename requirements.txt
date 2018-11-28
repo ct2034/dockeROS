@@ -1,4 +1,4 @@
-docker-py #docker library for python operations
+docker
+
 debug_print
 rospkg
-docker

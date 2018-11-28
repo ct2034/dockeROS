@@ -21,6 +21,7 @@ from shutil import copyfile
 import subprocess
 
 logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger("docker").setLevel(logging.INFO)
 if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
     from debug_print import debug_eval_print
 else:
@@ -93,13 +94,13 @@ def path_checksum(this_path):
 
 class DockeROSImage():
     """
-        Remotely deploys a docker container with a user specified image of a 
+        Remotely deploys a docker container with a user specified image of a
         rospackage
         Args:
             image (str): the image is created with user input + '_dockerfile'
             ip (str): IP address of the robot on which the container should run
             port (str): Port on which docker demon is running, check from robot
-            roscommand (str): e.g. roslaunch or rosrun based on type of ros 
+            roscommand (str): e.g. roslaunch or rosrun based on type of ros
             package file
             rospackage (str): the user specified rospackage which should run
             roslaunchfile (str) : the specific ros file to be run
@@ -167,9 +168,9 @@ class DockeROSImage():
                     break
         if not self.dockerfile:
             if self.user_package:
-                self.dockerfile = self.dockeros_path + '/source_Dockerfile'
+                self.dockerfile = self.dockeros_path + '/config/source_Dockerfile'
             else:  # system package
-                self.dockerfile = self.dockeros_path + '/default_Dockerfile'
+                self.dockerfile = self.dockeros_path + '/config/default_Dockerfile'
             logging.info('Using default Dockerfile:\n> ' + self.dockerfile)
 
         # What is the image name going to be?
@@ -220,11 +221,12 @@ class DockeROSImage():
         """
         Compiles a baseDocker image with specific image of a rospackage
         """
-        cli = docker.APIClient(base_url='unix://var/run/docker.sock')
+        TMP_DF_PATH = '/tmp/tmp_Dockerfile'
+        client = docker.from_env()
         if self.user_package:
             try:
                 in_file = open(self.dockerfile, 'r')
-                it = cli.build(path=self.path,
+                it = client.images.build(path=self.path,
                                tag=self.name + ":" + self.tag,
                                dockerfile=self.dockerfile,
                                buildargs={
@@ -246,27 +248,31 @@ class DockeROSImage():
         else:
             assert self.deb_package, "Debian package needs to be available"
             if True:
-                in_file = open(self.dockerfile, 'r')
+                with open(self.dockerfile, 'r') as in_file:
+                    with open(TMP_DF_PATH, 'w+') as out_file:
+                        out_file.truncate()
+                        for l in in_file:
+                            l = l.replace("#####DEB_PACKAGE#####", self.deb_package)
+                            l = l.replace("#####CMD#####", "[\""+"\", \"".join(
+                                ["/ros_entrypoint.sh"] + self.roscommand
+                            )+"\"]" )
+                            out_file.write(l)
+                        out_file.close()
 
-                out_file = FileIO('/tmp/tmp_Dockerfile', 'w+')
-                out_file.seek(0)
-                out_file.truncate()
-                for l in in_file:
-                    l = l.replace("#####DEB_PACKAGE#####", self.deb_package)
-                    l = l.replace("#####CMD#####", "[\""+"\", \"".join(self.roscommand)+"\"]")
-                    out_file.write(l)
-                out_file.seek(0)
-                for l in out_file:
-                    print l
-                it = cli.build(
-                    fileobj=out_file,
-                    custom_context=True,
-                    tag=self.name + ":" + self.tag
-                    )
-                for l in it:
-                    ld = eval(l)
-                    if ld.__class__ == dict and "stream" in ld.keys():
-                        logging.info(ld["stream"].strip())
+                with open(TMP_DF_PATH, 'r') as dockerfile:
+                    for l in dockerfile:
+                        print l.strip()
+
+                with open(TMP_DF_PATH, 'r') as dockerfile:
+                    it = client.images.build(
+                        fileobj=dockerfile,
+                        custom_context=False,
+                        tag=self.name + ":" + self.tag
+                        )
+                    for l in it:
+                        ld = eval(l)
+                        if ld.__class__ == dict and "stream" in ld.keys():
+                            logging.info(ld["stream"].strip())
             # except Exception  as e:
             #     logging.error("Exception during building:" + str(e))
             # finally:
@@ -274,7 +280,7 @@ class DockeROSImage():
             #     out_file.close()
 
         # Tag as latest (rebuild ?!?)
-        it = cli.build(path=self.path,
+        it = client.images.build(path=self.path,
                        tag=self.name + ":" + "latest",
                        buildargs={
                            "PACKAGE": self.rospackage

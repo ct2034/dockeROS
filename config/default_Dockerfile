@@ -1,7 +1,6 @@
-FROM ros:kinetic-core
+FROM ros:kinetic-ros-core
 
 RUN apt-get update
-RUN apt-get install #####DEB_PACKAGE#####
+RUN apt-get install -y #####DEB_PACKAGE#####
 
 CMD #####CMD#####
-
