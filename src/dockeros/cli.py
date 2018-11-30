@@ -14,7 +14,7 @@ else:
 
 usage = "USAGE:\n" + \
         "," * 80 + "\n" \
-        "$ dockeROS <build/run> <IP:Port> roslaunch ros_naviagtion move_base.launch\n" \
+        "$ dr <build/run> <IP:Port> roslaunch ros_naviagtion move_base.launch\n" \
         "Will perform the ros command in a docker container at the mentioned IP\n" + \
         "'" * 80 + "\n" \
 
@@ -24,7 +24,8 @@ def dummy():
 commands = {
     "build": dummy,
     "run": dummy,
-    "push": dummy
+    "push": dummy,
+    "_get_allowed_roscommands": dummy,
 }
 
 def subprocess_cmd(command):
@@ -32,16 +33,17 @@ def subprocess_cmd(command):
     proc_stdout = process.communicate()[0].strip()
     logging.info(proc_stdout)
 
+command = ""
 try:
     command = sys.argv[1]
-    if not command in commands.keys():
-        raise Exception()
 except:
     logging.info(usage)
-    logging.error("No valid command")
     exit()
 
-if command == "build":  # no ip needed
+if command == "_get_allowed_roscommands":
+    print(" ".join(image._get_allowed_roscommands()))
+    exit()
+elif command == "build" or command == "push":  # no ip needed
     try:
         roscommand = sys.argv[2:]
         ip = ""
@@ -50,8 +52,7 @@ if command == "build":  # no ip needed
         logging.info(usage)
         logging.error("Ros command not entered! exiting script")
         exit()
-
-else:  # ip needed
+elif command == "run":  # ip needed
     try:
         ip_and_port = sys.argv[2]
         ip = ip_and_port.split(':')[0]
@@ -67,6 +68,10 @@ else:  # ip needed
         logging.info(usage)
         logging.error("Ros command not entered! exiting script")
         exit()
+else:
+    logging.info(usage)
+    logging.error("No valid command: >" + command + "<")
+    exit()
 
 rp = rospkg.RosPack()
 fname = rp.get_path('dockeros') + '/config.yaml'

@@ -24,72 +24,15 @@ logging.getLogger("docker").setLevel(logging.INFO)
 if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
     def debug_eval_print(a):
         print(a)
+    DEBUG = True
 else:
     def debug_eval_print(_):
         pass
+    DEBUG = True
 
 
-class MltThrd(threading.Thread):
-    def __init__(self, cmd, queue):
-        threading.Thread.__init__(self)
-        self.cmd = cmd
-        self.queue = queue
-
-    def run(self):
-        # execute the command, queue the result
-        subprocess.call(self.cmd, shell=True)
-
-
-def compare(str1, str2):
-    """
-        Compares two input strings and returns true or false after running
-        md5 checksum algorithm
-        Args:
-            str1 (str): 1st string
-            str1 (str): 2nd string
-    """
-    m1 = hashlib.md5()
-    m2 = hashlib.md5()
-    m1.update(str1)
-    m2.update(str2)
-    return m1.digest() == m2.digest()
-
-
-def path_checksum(this_path):
-    """
-    Recursively calculates a checksum representing the contents of all files
-    found with a sequence of file and/or directory paths.
-    Source: https://code.activestate.com/recipes/576973-getting-the-sha-1-or-md5-hash-of-a-directory/#c3
-
-    """
-    paths = [this_path]
-    if not hasattr(paths, '__iter__'):
-        raise TypeError('sequence or iterable expected not %r!' % type(paths))
-
-    def _update_checksum(checksum, dirname, filenames):
-        for filename in sorted(filenames):
-            this_path = path.join(dirname, filename)
-            if path.isfile(this_path):
-                logging.debug(path)
-                fh = open(this_path, 'rb')
-                while 1:
-                    buf = fh.read(4096)
-                    if not buf:
-                        break
-                    checksum.update(buf)
-                fh.close()
-
-    chksum = hashlib.sha1()
-
-    for p in sorted([path.normpath(f) for f in paths]):
-        if path.exists(p):
-            if path.isdir(p):
-                path.walk(p, _update_checksum, chksum)
-            elif path.isfile(path):
-                _update_checksum(chksum, path.dirname(
-                    path), path.basename(path))
-
-    return chksum.hexdigest()
+def _get_allowed_roscommands():
+    return ['roslaunch', 'rosrun']
 
 
 class DockeROSImage():
@@ -112,8 +55,6 @@ class DockeROSImage():
         ..  >>> obj.build_docker_image()
     """
 
-    allowed_roscommands = ['roslaunch', 'rosrun']
-
     def __init__(self, roscommand, config):
         # how to reach the client?
 
@@ -124,7 +65,7 @@ class DockeROSImage():
         assert isinstance(roscommand, list), "roscommand should be a list"
         assert isinstance(roscommand[0], str), "roscommand should be a list of strings"
         self.roscommand = roscommand
-        if roscommand[0] in DockeROSImage.allowed_roscommands:
+        if roscommand[0] in _get_allowed_roscommands():
             self.roscommand = roscommand[:]
             self.rospackage = roscommand[1]
         else:
@@ -178,16 +119,16 @@ class DockeROSImage():
                           ':' + str(config['registry']['port']) + '/'
         self.name = registry_string + \
                     "_".join(self.roscommand).replace('.', '-')
-        if self.path:
-            self.tag = str(path_checksum(self.path))
-        else:
-            self.tag = "latest"
+        self.tag = "latest"
         logging.info("The name of the image will be: \n> " + self.name)
+
+        # The actual image:
+        self.image = None
 
     def check_rosdep(self):
         out = subprocess.check_output(
             " ".join(
-                ["source", "/opt/ros/kinetic/setup.bash;", "rosdep", "resolve", self.rospackage, "--os=ubuntu:xenial"]),
+                ["rosdep", "resolve", self.rospackage, "--os=ubuntu:xenial"]),
             # TODO: dynamic os definition
             shell=True)
         logging.debug(out)
@@ -259,41 +200,22 @@ class DockeROSImage():
                             out_file.write(l)
                         out_file.close()
 
-                with open(TMP_DF_PATH, 'r') as dockerfile:
-                    for l in dockerfile:
-                        print l.strip()
+                if DEBUG:
+                    with open(TMP_DF_PATH, 'r') as dockerfile:
+                        print "Dockerfile used: ###############################"
+                        for l in dockerfile:
+                            print l.strip()
+                        print "################################################"
 
                 with open(TMP_DF_PATH, 'r') as dockerfile:
-                    it = client.images.build(
+                    self.image, it = client.images.build(
                         fileobj=dockerfile,
                         custom_context=False,
                         tag=self.name + ":" + self.tag
                         )
                     for l in it:
-                        ld = eval(l)
-                        if ld.__class__ == dict and "stream" in ld.keys():
-                            logging.info(ld["stream"].strip())
-            # except Exception  as e:
-            #     logging.error("Exception during building:" + str(e))
-            # finally:
-            #     in_file.close()
-            #     out_file.close()
-
-        # Tag as latest (rebuild ?!?)
-        it = client.images.build(path=self.path,
-                       tag=self.name + ":" + "latest",
-                       buildargs={
-                           "PACKAGE": self.rospackage
-                       },
-                       labels={
-                           "label_a": "1",
-                           "label_b": "2"
-                       }
-                       )
-        for l in it:
-            ld = eval(l)
-            if ld.__class__ == dict and "stream" in ld.keys():
-                logging.info(ld["stream"].strip())
+                        print('| '+(l['stream'].strip() if ('stream' in l.keys()) else ''))
+        logging.info("Image was created. Tags are: " + ', '.join(self.image.tags))
 
     def run_image(self):
         logging.info("ROS command to be executed:\n > " + self.roscommand)
