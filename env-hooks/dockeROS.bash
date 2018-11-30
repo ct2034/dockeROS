@@ -1,5 +1,5 @@
 #!/bin/bash
-function dr() {
+function dockeros() {
   local workspace=$(roscd && cd .. && pwd)
   local package=$(rospack find dockeros)
   case $1 in
@@ -21,9 +21,9 @@ function dr() {
   esac
 }
 
-function _complete_dr() {
+function _complete_dockeros() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
-  local drcmd="${COMP_WORDS[1]}"
+  local dockeroscmd="${COMP_WORDS[1]}"
   local package=$(rospack find dockeros)
   local allowed_roscommands=$(python2 $package/src/dockeros/cli.py _get_allowed_roscommands)
   local roscmd="${COMP_WORDS[2]}"
@@ -34,7 +34,7 @@ function _complete_dr() {
     COMPREPLY=( $(compgen -W "b build r run p push" -- $cur) )
     ;;
 	2)
-    case "${drcmd}" in
+    case "${dockeroscmd}" in
     b|build)
       shift
       COMPREPLY=( $(compgen -W "$allowed_roscommands" -- $cur) )
@@ -77,4 +77,4 @@ function _complete_dr() {
   esac
 }
 
-complete -F _complete_dr dr
+complete -F _complete_dockeros dockeros

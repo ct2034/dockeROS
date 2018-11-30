@@ -14,7 +14,7 @@ else:
 
 usage = "USAGE:\n" + \
         "," * 80 + "\n" \
-        "$ dr <build/run> <IP:Port> roslaunch ros_naviagtion move_base.launch\n" \
+        "$ dockeros <build/run> <IP:Port> roslaunch ros_naviagtion move_base.launch\n" \
         "Will perform the ros command in a docker container at the mentioned IP\n" + \
         "'" * 80 + "\n" \
 
