@@ -21,6 +21,7 @@ import subprocess
 
 logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger("docker").setLevel(logging.INFO)
+logging.getLogger("urllib3").setLevel(logging.INFO)
 if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
     def debug_eval_print(a):
         print(a)
@@ -28,7 +29,7 @@ if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
 else:
     def debug_eval_print(_):
         pass
-    DEBUG = True
+    DEBUG = False
 
 
 def _get_allowed_roscommands():
@@ -115,10 +116,9 @@ class DockeROSImage():
             logging.info('Using default Dockerfile:\n> ' + self.dockerfile)
 
         # What is the image name going to be?
-        registry_string = config['registry']['host'] + \
+        self.registry_string = config['registry']['host'] + \
                           ':' + str(config['registry']['port']) + '/'
-        self.name = registry_string + \
-                    "_".join(self.roscommand).replace('.', '-')
+        self.name = "_".join(self.roscommand).replace('.', '-')
         self.tag = "latest"
         logging.info("The name of the image will be: \n> " + self.name)
 
@@ -194,6 +194,7 @@ class DockeROSImage():
                         out_file.truncate()
                         for l in in_file:
                             l = l.replace("#####DEB_PACKAGE#####", self.deb_package)
+                            l = l.replace("#####ROS_MASTER_URI#####", "http://172.17.0.1:11311") # TODO: config
                             l = l.replace("#####CMD#####", "[\""+"\", \"".join(
                                 ["/ros_entrypoint.sh"] + self.roscommand
                             )+"\"]" )
@@ -202,10 +203,10 @@ class DockeROSImage():
 
                 if DEBUG:
                     with open(TMP_DF_PATH, 'r') as dockerfile:
-                        print "Dockerfile used: ###############################"
+                        print "Dockerfile used: ############################################"
                         for l in dockerfile:
                             print l.strip()
-                        print "################################################"
+                        print "#############################################################"
 
                 with open(TMP_DF_PATH, 'r') as dockerfile:
                     self.image, it = client.images.build(
@@ -215,11 +216,16 @@ class DockeROSImage():
                         )
                     for l in it:
                         print('| '+(l['stream'].strip() if ('stream' in l.keys()) else ''))
-        logging.info("Image was created. Tags are: " + ', '.join(self.image.tags))
+                    logging.info("Image was created. Tags are: " + ', '.join(self.image.tags))
 
     def run_image(self):
-        logging.info("ROS command to be executed:\n > " + self.roscommand)
-        logging.info("On Server:\n > " + ':'.join([self.ip, self.port]))
+        logging.info("ROS command to be executed:\n > " + " ".join(self.roscommand))
+        client = docker.from_env()
+        client.containers.run(
+            image=self.name,
+            name=self.name,
+            network='host'
+            )
 
     def push_image(self):
-        logging.info("to be implemented")
+        client = docker.from_env()

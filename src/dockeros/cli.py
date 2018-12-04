@@ -1,4 +1,3 @@
-import subprocess
 import sys
 import image
 import logging
@@ -21,19 +20,6 @@ usage = "USAGE:\n" + \
 def dummy():
     logging.info("to be implemented ..")
 
-commands = {
-    "build": dummy,
-    "run": dummy,
-    "push": dummy,
-    "_get_allowed_roscommands": dummy,
-}
-
-def subprocess_cmd(command):
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-    proc_stdout = process.communicate()[0].strip()
-    logging.info(proc_stdout)
-
-command = ""
 try:
     command = sys.argv[1]
 except:
@@ -79,18 +65,8 @@ config = yaml.load(open(fname))
 dock_obj = image.DockeROSImage(roscommand,
                                config=config)
 
-commands["build"] = dock_obj.build_image
-commands["run"] = dock_obj.run_image
+if command == "build":
+    dock_obj.build_image()
 
-if 1:
-    commands[command]()
-# except Exception as e:
-#     logging.error("Failed to execute command")
-#     logging.error(e)
-#     raise e
-#     exit()
-
-
-# if not dock_obj.does_exist_on_client():
-# else:
-#     dock_obj.run_existing_image()
+if command == "run":
+    dock_obj.run_image()

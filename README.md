@@ -10,12 +10,12 @@ There is a CLI to use these capabilities in you development lifecycle and plans 
 
 ## Prerequesits
 ### Server
-The python packages required by the server can be installed via `sudo pip install -r requirements.txt`. 
+The python packages required by the server can be installed via `sudo pip install -r requirements.txt`.
 To install docker, you can use [this](https://docs.docker.com/engine/installation/linux/ubuntu/).
 You will also need to run a docker registry on your system: `docker run -d -p 5000:5000 --name registry registry`
 
 ### Client (Robot)
-On the robot you need to have a [docker deamon](https://docs.docker.com/edge/engine/reference/commandline/dockerd/) running with an accesibly API. 
+On the robot you need to have a [docker deamon](https://docs.docker.com/edge/engine/reference/commandline/dockerd/) running with an accesibly API.
 To install docker, you can use [this](https://docs.docker.com/engine/installation/linux/ubuntu/).
 A good way to do this on systems running `systemd` is can be found [here](https://www.campalus.com/enable-remote-tcp-connections-to-docker-host-running-ubuntu-15-04/).
 We **strongly** recommend to use [TLS for your deamons socket](http://lnr.li/60LYw/)
