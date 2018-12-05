@@ -218,14 +218,17 @@ class DockeROSImage():
                         print('| '+(l['stream'].strip() if ('stream' in l.keys()) else ''))
                     logging.info("Image was created. Tags are: " + ', '.join(self.image.tags))
 
-    def run_image(self):
+    def run_image(self, ip=None, port=None):
         logging.info("ROS command to be executed:\n > " + " ".join(self.roscommand))
-        client = docker.from_env()
+        client = self.make_client(ip, port)
         client.containers.run(
             image=self.name,
             name=self.name,
             network='host'
             )
+
+    def make_client(self, ip=None, port=None):
+        return docker.from_env()
 
     def push_image(self):
         client = docker.from_env()
