@@ -1,23 +1,11 @@
 import os
 import re
-import socket
 import subprocess
-import threading
-import hashlib
-from StringIO import StringIO
-from io import FileIO
-
 import docker
-import shutil
-from os import path
 import json
-
 import logging
 import rospkg
-import rosdep2
 import sys
-from shutil import copyfile
-import subprocess
 
 logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger("docker").setLevel(logging.INFO)
@@ -57,6 +45,13 @@ class DockeROSImage():
     """
 
     def __init__(self, roscommand, config):
+        """
+            Initilizes the commands with the rospkg configuration and roscommands allowed in this context
+            Args:
+                roscommand: any of suppoorted roscommands (rosrun/roslaunch) [Also:_get_allowed_roscommands]
+                config: configuraion for rospkg
+
+        """
         # how to reach the client?
 
         # Version info
@@ -126,6 +121,9 @@ class DockeROSImage():
         self.image = None
 
     def check_rosdep(self):
+        """
+            Checking system dependencies required by ROS packages
+        """
         out = subprocess.check_output(
             " ".join(
                 ["rosdep", "resolve", self.rospackage, "--os=ubuntu:xenial"]),
