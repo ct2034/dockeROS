@@ -165,11 +165,10 @@ class DockeROSImage():
         Compiles a baseDocker image with specific image of a rospackage
         """
         TMP_DF_PATH = '/tmp/tmp_Dockerfile'
-        client = docker.from_env()
         if self.user_package:
             try:
                 in_file = open(self.dockerfile, 'r')
-                it = client.images.build(path=self.path,
+                it = self.docker_client.images.build(path=self.path,
                                tag=self.name + ":" + self.tag,
                                dockerfile=self.dockerfile,
                                buildargs={
@@ -211,7 +210,7 @@ class DockeROSImage():
                         print "#############################################################"
 
                 with open(TMP_DF_PATH, 'r') as dockerfile:
-                    self.image, it = client.images.build(
+                    self.image, it = self.docker_client.images.build(
                         fileobj=dockerfile,
                         custom_context=False,
                         tag=self.name + ":" + self.tag
@@ -220,7 +219,7 @@ class DockeROSImage():
                         print('| '+(l['stream'].strip() if ('stream' in l.keys()) else ''))
                     logging.info("Image was created. Tags are: " + ', '.join(self.image.tags))
 
-    def run_image(self, ip=None, port=None):
+    def run_image(self):
         """
         Run the Image on Host
         Args:
@@ -228,15 +227,17 @@ class DockeROSImage():
             port: system port
         """
         logging.info("ROS command to be executed:\n > " + " ".join(self.roscommand))
-        client = self.make_client(ip, port)
-        client.containers.run(
+        self.docker_client.containers.run(
             image=self.name,
             name=self.name,
             network='host'
             )
 
     def make_client(self, ip=None, port=None):
-        return docker.from_env()
+        if not ip:
+            self.docker_client=docker.from_env()
+        else:
+            self.docker_client=docker.client("tcp:/"+":".join([ip.strip(), port.strip()]))
 
     def push_image(self):
         client = docker.from_env()

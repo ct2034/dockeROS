@@ -77,4 +77,4 @@ function _complete_dockeros() {
   esac
 }
 
-complete -F _complete_dockeros dockeros
+# complete -F _complete_dockeros dockeros
