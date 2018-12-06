@@ -7,7 +7,6 @@ import logging
 import rospkg
 import sys
 
-logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger("docker").setLevel(logging.INFO)
 logging.getLogger("urllib3").setLevel(logging.INFO)
 if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
@@ -40,8 +39,8 @@ class DockeROSImage():
         Example:
             >>> import image
             >>> obj = image.DockeROSImage(image, ip, port, roscommand, ca_cert)
-        ..  >>> obj.build_docker_image()
-        ..  >>> obj.build_docker_image()
+        ..  >>> obj.build_docker()
+        ..  >>> obj.build_docker()
     """
 
     def __init__(self, roscommand, config):
@@ -53,7 +52,7 @@ class DockeROSImage():
         """
         # how to reach the client?
         # Version info
-        logging.info("Python Version: " + sys.version + "\ndocker (library) Version: " + docker.__version__)
+        logging.debug("Python Version: " + sys.version + "\ndocker (library) Version: " + docker.__version__)
 
         # What is the ros command?
         assert isinstance(roscommand, list), "roscommand should be a list"
@@ -69,7 +68,7 @@ class DockeROSImage():
 
         # Where is the package?
         rp = rospkg.RosPack()
-        logging.info("The config is:\n"+json.dumps(config, indent=2))
+        logging.debug("The config is:\n"+json.dumps(config, indent=2))
         self.dockeros_path = rp.get_path('dockeros')
 
         self.path = None
@@ -109,8 +108,11 @@ class DockeROSImage():
             logging.info('Using default Dockerfile:\n> ' + self.dockerfile)
 
         # What is the image name going to be?
-        self.registry_string = config['registry']['host'] + \
-                          ':' + str(config['registry']['port']) + '/'
+        if "registry" in config.keys():
+            self.registry_string = config['registry']['host'] + \
+                              ':' + str(config['registry']['port']) + '/'
+        else:
+            self.registry_string = ""
         self.name = "_".join(self.roscommand).replace('.', '-')
         self.tag = "latest"
         logging.info("The name of the image will be: \n> " + self.name)
@@ -160,7 +162,7 @@ class DockeROSImage():
         image_names = map(lambda i: i.tags[0], images)
         return self.name in image_names
 
-    def build_image(self):
+    def build(self):
         """
         Compiles a baseDocker image with specific image of a rospackage
         """
@@ -219,19 +221,35 @@ class DockeROSImage():
                         print('| '+(l['stream'].strip() if ('stream' in l.keys()) else ''))
                     logging.info("Image was created. Tags are: " + ', '.join(self.image.tags))
 
-    def run_image(self):
+    def run(self):
         """
         Run the Image on Host
-        Args:
-            ip: system IP of host
-            port: system port
         """
-        logging.info("ROS command to be executed:\n > " + " ".join(self.roscommand))
+        logging.info("Starting:\n > " + " ".join(self.roscommand) + " <")
         self.docker_client.containers.run(
             image=self.name,
             name=self.name,
-            network='host'
+            network='host',
+            detach=True
             )
+
+    def stop(self):
+        """
+        Stop the container
+        """
+        logging.info("Stopping:\n > " + " ".join(self.roscommand) + " <")
+        try:
+            cont = self.docker_client.containers.get(self.name)
+            try:
+                cont.stop()
+            except Exception as e:
+                cont.kill()
+                logging.error(e)
+            cont.remove()
+            logging.info("Removed:\n > " + " ".join(self.roscommand) + " <")
+        except Exception as e:
+            logging.error(e)
+
 
     def make_client(self, ip=None, port=None):
         if not ip:
@@ -239,5 +257,6 @@ class DockeROSImage():
         else:
             self.docker_client=docker.client("tcp:/"+":".join([ip.strip(), port.strip()]))
 
-    def push_image(self):
-        client = docker.from_env()
+    def push(self):
+        if not self.registry_string:
+            logging.error("Your config has no registry. Pushing makes no sense.")
