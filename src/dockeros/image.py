@@ -49,11 +49,9 @@ class DockeROSImage():
             Initilizes the commands with the rospkg configuration and roscommands allowed in this context
             Args:
                 roscommand: any of suppoorted roscommands (rosrun/roslaunch) [Also:_get_allowed_roscommands]
-                config: configuraion for rospkg
-
+                config: configuraion for rospkg and connection to docker host
         """
         # how to reach the client?
-
         # Version info
         logging.info("Python Version: " + sys.version + "\ndocker (library) Version: " + docker.__version__)
 
@@ -135,6 +133,12 @@ class DockeROSImage():
     def connect(self, ip, port, ca_cert=None):
         """
         Connect to configured docker host
+        Args:
+            ip: system IP of host
+            port: system port
+            ca_cert: linux certificate authority
+            tls: transport layer security
+            docker_client: client on whcih to run Image
         """
         self.ip = ip
         self.port = port
@@ -217,6 +221,12 @@ class DockeROSImage():
                     logging.info("Image was created. Tags are: " + ', '.join(self.image.tags))
 
     def run_image(self, ip=None, port=None):
+        """
+        Run the Image on Host
+        Args:
+            ip: system IP of host
+            port: system port
+        """
         logging.info("ROS command to be executed:\n > " + " ".join(self.roscommand))
         client = self.make_client(ip, port)
         client.containers.run(
