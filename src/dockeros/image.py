@@ -109,13 +109,13 @@ class DockeROSImage():
 
         # What is the image name going to be?
         if "registry" in config.keys():
-            self.registry_string = config['registry']['host'] + \
-                              ':' + str(config['registry']['port']) + '/'
+            self.registry_string = config['registry'] + '/'
         else:
             self.registry_string = ""
         self.name = "_".join(self.roscommand).replace('.', '-')
-        self.tag = "latest"
-        logging.info("The name of the image will be: \n> " + self.name)
+        self.tag = self.registry_string + self.name
+        logging.info("name: \n> " + self.name)
+        logging.info("tag: \n> " + self.tag)
 
         # The actual image:
         self.image = None
@@ -126,8 +126,7 @@ class DockeROSImage():
         """
         out = subprocess.check_output(
             " ".join(
-                ["rosdep", "resolve", self.rospackage]), #, "--os=ubuntu:xenial"]),
-            # TODO: dynamic os definition
+                ["rosdep", "resolve", self.rospackage]),
             shell=True)
         logging.debug(out)
         self.deb_package = out.split("\n")[1].strip()
@@ -185,7 +184,7 @@ class DockeROSImage():
                     self.image, it = self.docker_client.images.build(
                         fileobj=dockerfile,
                         custom_context=False,
-                        tag=self.name + ":" + self.tag
+                        tag=self.tag
                         )
                     for l in it:
                         print('| '+(l['stream'].strip() if ('stream' in l.keys()) else ''))
@@ -197,7 +196,7 @@ class DockeROSImage():
         """
         logging.info("Starting:\n > " + " ".join(self.roscommand) + " <")
         self.docker_client.containers.run(
-            image=self.name,
+            image=self.tag,
             name=self.name,
             network='host',
             detach=True
@@ -230,3 +229,7 @@ class DockeROSImage():
     def push(self):
         if not self.registry_string:
             logging.error("Your config has no registry. Pushing makes no sense.")
+        else:
+            stream = self.docker_client.images.push(self.tag, stream=True)
+            for l in stream:
+                print(l)
