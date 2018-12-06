@@ -6,13 +6,7 @@ import logging
 import yaml
 import rospkg
 
-logging.getLogger('root').setLevel(logging.DEBUG)
-if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
-    pass
-else:
-    def debug_eval_print(_):
-        pass
-
+logging.getLogger().setLevel(logging.INFO)
 
 def ip_validator(input):
     ip_and_port = input.split(":")
@@ -47,8 +41,7 @@ parser.add_argument("roscommand", nargs=argparse.REMAINDER,
     help="Everything after the subcommand will be interpreted as the ros command to be run in your image")
 
 args = parser.parse_args()
-print(args)
-print(args.subcommand)
+logging.debug(args)
 
 rp = rospkg.RosPack()
 fname = rp.get_path('dockeros') + '/config.yaml'
@@ -69,7 +62,7 @@ elif args.subcommand == "run":
     dock_obj.run_image()
 
 elif args.subcommand == "stop":
-    pass
+    dock_obj.stop()
 
 elif args.subcommand == "push":
     pass

@@ -7,7 +7,6 @@ import logging
 import rospkg
 import sys
 
-logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger("docker").setLevel(logging.INFO)
 logging.getLogger("urllib3").setLevel(logging.INFO)
 if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
@@ -53,7 +52,7 @@ class DockeROSImage():
         """
         # how to reach the client?
         # Version info
-        logging.info("Python Version: " + sys.version + "\ndocker (library) Version: " + docker.__version__)
+        logging.debug("Python Version: " + sys.version + "\ndocker (library) Version: " + docker.__version__)
 
         # What is the ros command?
         assert isinstance(roscommand, list), "roscommand should be a list"
@@ -69,7 +68,7 @@ class DockeROSImage():
 
         # Where is the package?
         rp = rospkg.RosPack()
-        logging.info("The config is:\n"+json.dumps(config, indent=2))
+        logging.debug("The config is:\n"+json.dumps(config, indent=2))
         self.dockeros_path = rp.get_path('dockeros')
 
         self.path = None
@@ -222,16 +221,32 @@ class DockeROSImage():
     def run_image(self):
         """
         Run the Image on Host
-        Args:
-            ip: system IP of host
-            port: system port
         """
-        logging.info("ROS command to be executed:\n > " + " ".join(self.roscommand))
+        logging.info("Starting:\n > " + " ".join(self.roscommand) + " <")
         self.docker_client.containers.run(
             image=self.name,
             name=self.name,
-            network='host'
+            network='host',
+            detach=True
             )
+
+    def stop(self):
+        """
+        Stop the container
+        """
+        logging.info("Stopping:\n > " + " ".join(self.roscommand) + " <")
+        try:
+            cont = self.docker_client.containers.get(self.name)
+            try:
+                cont.stop()
+            except Exception as e:
+                cont.kill()
+                logging.error(e)
+            cont.remove()
+            logging.info("Removed:\n > " + " ".join(self.roscommand) + " <")
+        except Exception as e:
+            logging.error(e)
+
 
     def make_client(self, ip=None, port=None):
         if not ip:
