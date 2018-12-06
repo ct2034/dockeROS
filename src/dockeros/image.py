@@ -159,7 +159,6 @@ class DockeROSImage():
                         out_file.truncate()
                         for l in in_file:
                             l = l.replace("#####DEB_PACKAGE#####", self.deb_package)
-                            l = l.replace("#####ROS_MASTER_URI#####", "http://172.17.0.1:11311") # TODO: config
                             l = l.replace("#####CMD#####", "[\""+"\", \"".join(
                                 ["/ros_entrypoint.sh"] + self.roscommand
                             )+"\"]" )
