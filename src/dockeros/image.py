@@ -27,27 +27,20 @@ class DockeROSImage():
     """
         Remotely deploys a docker container with a user specified image of a
         rospackage
-        Args:
-            image (str): the image is created with user input + '_dockerfile'
-            ip (str): IP address of the robot on which the container should run
-            port (str): Port on which docker demon is running, check from robot
-            roscommand (str): e.g. roslaunch or rosrun based on type of ros
-            package file
-            rospackage (str): the user specified rospackage which should run
-            roslaunchfile (str) : the specific ros file to be run
 
         Example:
             >>> import image
-            >>> obj = image.DockeROSImage(image, ip, port, roscommand, ca_cert)
-        ..  >>> obj.build_docker()
-        ..  >>> obj.build_docker()
+            >>> obj = image.DockeROSImage(roscommand, config)
+            >>> obj.make_client()
+            >>> obj.build()
+            >>> obj.run()
     """
 
     def __init__(self, roscommand, config):
         """
             Initilizes the commands with the rospkg configuration and roscommands allowed in this context
             Args:
-                roscommand: any of suppoorted roscommands (rosrun/roslaunch) [Also:_get_allowed_roscommands]
+                roscommand: any of suppoorted roscommands (rosrun/roslaunch)
                 config: configuraion for rospkg and connection to docker host
         """
         # how to reach the client?
@@ -122,7 +115,7 @@ class DockeROSImage():
 
     def check_rosdep(self):
         """
-            Checking system dependencies required by ROS packages
+        Checking system dependencies required by ROS packages
         """
         out = subprocess.check_output(
             " ".join(
@@ -219,17 +212,29 @@ class DockeROSImage():
         except Exception as e:
             logging.error(e)
 
-
-    def make_client(self, ip=None, port=None):
-        if not ip:
-            self.docker_client=docker.from_env()
-        else:
-            self.docker_client=docker.client("tcp:/"+":".join([ip.strip(), port.strip()]))
-
     def push(self):
+        """
+        Push the image to a registry defined in the config
+        """
         if not self.registry_string:
             logging.error("Your config has no registry. Pushing makes no sense.")
         else:
             stream = self.docker_client.images.push(self.tag, stream=True)
             for l in stream:
                 print(l)
+
+
+    def make_client(self, ip=None, port=None):
+        """
+        Initialize a docker client either using local or remote docker deamon.
+        When you give no parameters, the local enviornment is used.
+        So either your local deamon or the one defined in the DOCKER_HOST environment variable.(see https://dockr.ly/2zMPc17 for details)
+        (see https://dockr.ly/2zMPc17 for details)
+        Args:
+            ip: ip or host of the remote deamon (give None to use local environment)
+            port: port of the remote deamon
+        """
+        if not ip:
+            self.docker_client=docker.from_env()
+        else:
+            self.docker_client=docker.client("tcp:/"+":".join([ip.strip(), port.strip()]))

@@ -54,7 +54,7 @@ When you get this error: `{"errorDetail":{"message":"Get https://YOUR_REGISTRY:5
 
 Add the server to your unsafe registries in `daemon.json` (default at `/etc/docker/daemon.json` )
 ```
-"insecure-registries":["192.168.99.100:5000"]
+"insecure-registries":["YOUR_REGISTRY:5000"]
 ```
 and restart your docker deamon.
 ```
