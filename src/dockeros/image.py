@@ -132,36 +132,6 @@ class DockeROSImage():
         logging.debug(out)
         self.deb_package = out.split("\n")[1].strip()
 
-    def connect(self, ip, port, ca_cert=None):
-        """
-        Connect to configured docker host
-        Args:
-            ip: system IP of host
-            port: system port
-            ca_cert: linux certificate authority
-            tls: transport layer security
-            docker_client: client on whcih to run Image
-        """
-        self.ip = ip
-        self.port = port
-        self.ip_str = "tcp://" + self.ip + ":" + self.port
-        self.ca_cert = ca_cert
-        self.tls = docker.tls.TLSConfig(ca_cert=self.ca_cert) if self.ca_cert else False
-        self.docker_client = docker.DockerClient(self.ip_str, tls=self.tls)
-
-    def does_exist_on_client(self):
-        """
-        Checks whether a similar image exists or not
-        """
-        self.connect()
-        images = self.docker_client.images.list()
-        logging.info("Currently available images:")
-        logging.info("image_names")
-        for image in images:
-            logging.info(image)
-        image_names = map(lambda i: i.tags[0], images)
-        return self.name in image_names
-
     def build(self):
         """
         Compiles a baseDocker image with specific image of a rospackage

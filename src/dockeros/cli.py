@@ -45,7 +45,11 @@ logging.debug(args)
 
 rp = rospkg.RosPack()
 fname = rp.get_path('dockeros') + '/config/config.yaml'
-config = yaml.load(open(fname))
+try:
+    config = yaml.load(open(fname))
+except Exception as e:
+    logging.warn("No config file found under " + fname)
+    config = {}
 dock_obj = image.DockeROSImage(args.roscommand,
                                config=config)
 if args.env:
