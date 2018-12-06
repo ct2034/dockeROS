@@ -44,7 +44,7 @@ args = parser.parse_args()
 logging.debug(args)
 
 rp = rospkg.RosPack()
-fname = rp.get_path('dockeros') + '/config.yaml'
+fname = rp.get_path('dockeros') + '/config/config.yaml'
 config = yaml.load(open(fname))
 dock_obj = image.DockeROSImage(args.roscommand,
                                config=config)
@@ -54,15 +54,15 @@ else:
     dock_obj.make_client(args.ip_and_port[0], args.ip_and_port[1])
 
 if args.subcommand == "build":
-    dock_obj.build_image()
+    dock_obj.build()
 
 elif args.subcommand == "run":
     if not args.no_build:
-        dock_obj.build_image()
-    dock_obj.run_image()
+        dock_obj.build()
+    dock_obj.run()
 
 elif args.subcommand == "stop":
     dock_obj.stop()
 
 elif args.subcommand == "push":
-    pass
+    dock_obj.push()

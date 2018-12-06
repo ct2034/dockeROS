@@ -39,8 +39,8 @@ class DockeROSImage():
         Example:
             >>> import image
             >>> obj = image.DockeROSImage(image, ip, port, roscommand, ca_cert)
-        ..  >>> obj.build_docker_image()
-        ..  >>> obj.build_docker_image()
+        ..  >>> obj.build_docker()
+        ..  >>> obj.build_docker()
     """
 
     def __init__(self, roscommand, config):
@@ -108,8 +108,11 @@ class DockeROSImage():
             logging.info('Using default Dockerfile:\n> ' + self.dockerfile)
 
         # What is the image name going to be?
-        self.registry_string = config['registry']['host'] + \
-                          ':' + str(config['registry']['port']) + '/'
+        if "registry" in config.keys():
+            self.registry_string = config['registry']['host'] + \
+                              ':' + str(config['registry']['port']) + '/'
+        else:
+            self.registry_string = ""
         self.name = "_".join(self.roscommand).replace('.', '-')
         self.tag = "latest"
         logging.info("The name of the image will be: \n> " + self.name)
@@ -159,7 +162,7 @@ class DockeROSImage():
         image_names = map(lambda i: i.tags[0], images)
         return self.name in image_names
 
-    def build_image(self):
+    def build(self):
         """
         Compiles a baseDocker image with specific image of a rospackage
         """
@@ -218,7 +221,7 @@ class DockeROSImage():
                         print('| '+(l['stream'].strip() if ('stream' in l.keys()) else ''))
                     logging.info("Image was created. Tags are: " + ', '.join(self.image.tags))
 
-    def run_image(self):
+    def run(self):
         """
         Run the Image on Host
         """
@@ -254,5 +257,6 @@ class DockeROSImage():
         else:
             self.docker_client=docker.client("tcp:/"+":".join([ip.strip(), port.strip()]))
 
-    def push_image(self):
-        client = docker.from_env()
+    def push(self):
+        if not self.registry_string:
+            logging.error("Your config has no registry. Pushing makes no sense.")
