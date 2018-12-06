@@ -124,7 +124,7 @@ class DockeROSImage():
         """
         out = subprocess.check_output(
             " ".join(
-                ["rosdep", "resolve", self.rospackage, "--os=ubuntu:xenial"]),
+                ["rosdep", "resolve", self.rospackage]), #, "--os=ubuntu:xenial"]),
             # TODO: dynamic os definition
             shell=True)
         logging.debug(out)
