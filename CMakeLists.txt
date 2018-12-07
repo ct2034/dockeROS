@@ -18,7 +18,7 @@ catkin_add_env_hooks(dockeROS SHELLS bash DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
 ## Install ##
 #############
 
-# catkin_python_setup()
+catkin_python_setup()
 
 if(CATKIN_ENABLE_TESTING)
  find_package(rostest REQUIRED)
