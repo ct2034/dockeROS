@@ -1,0 +1,3 @@
+<launch>
+  <test test-name="image_test" pkg="dockeros" type="image_test.py" />
+</launch>
