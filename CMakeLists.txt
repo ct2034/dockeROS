@@ -13,3 +13,17 @@ include_directories(
 )
 
 catkin_add_env_hooks(dockeROS SHELLS bash DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/env-hooks)
+
+#############
+## Install ##
+#############
+
+catkin_python_setup()
+
+catkin_install_python(PROGRAMS src/dockeros/cli.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+if(CATKIN_ENABLE_TESTING)
+ find_package(rostest REQUIRED)
+ add_rostest(tests/image.test)
+endif()
