@@ -10,9 +10,9 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>rospy</build_depend>
-  <build_depend>docker-py</build_depend>
+  <!-- <build_depend>docker-py</build_depend> -->
   <run_depend>rospy</run_depend>
-  <run_depend>docker-py</run_depend>
+  <!-- <run_depend>docker-py</run_depend> -->
   <test_depend>rostest</test_depend>
 
   <export>
