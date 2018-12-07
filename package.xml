@@ -4,7 +4,7 @@
   <version>1.0.0</version>
   <description>Simply running ros nodes in docker containers on remote robots.</description>
 
-  <maintainer email="christian.henkel@ipa.fraunhofer.de">ct2034</maintainer>
+  <maintainer email="post@henkelchristian.de">ct2034</maintainer>
 
   <license>BSD</license>
 

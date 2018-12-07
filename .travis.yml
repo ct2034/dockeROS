@@ -6,7 +6,7 @@ services:
 
 before_install:
   - sudo apt-get install -y python-pip
-  - sudo pip install docker
+  - sudo -H pip install docker
 
 env:
   global:
