@@ -4,14 +4,14 @@ language: minimal
 services:
   - docker
 
-before_install:
-  - sudo apt-get install -y python-pip
-  - sudo -H pip install docker
+# before_install:
+#   - sudo apt-get install -y python-pip
+#   - sudo -H pip2 install docker
 
 env:
   global:
     - ROS_REPO=ros
-    - ADDITIONAL_DEBS=clang
+    - ADDITIONAL_DEBS=python-docker
   matrix:
     - ROS_DISTRO="indigo"
     - ROS_DISTRO="kinetic"
