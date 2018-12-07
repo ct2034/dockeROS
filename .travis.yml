@@ -4,6 +4,10 @@ language: minimal
 services:
   - docker
 
+before_install:
+  - sudo apt-get install -y python-pip
+  - sudo pip install docker
+
 env:
   global:
     - ROS_REPO=ros
