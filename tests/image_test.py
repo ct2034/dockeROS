@@ -2,9 +2,10 @@
 PKG = 'dockeros'
 # from dockeros.image import DockeROSImage
 
+import docker
+import subprocess
 import sys
 import unittest
-import docker
 
 TEST_IMAGES = ["rosrun_move_base_move_base"]
 
@@ -32,6 +33,11 @@ class TestLib(unittest.TestCase):
 
 class TestCLI(unittest.TestCase):
     def test_getting_help(self):
+        # out = subprocess.check_output(
+        #     " ".join(
+        #         ["dockeros", "-h"]),
+        #     shell=True)
+        # print(out)
         self.assertEquals(1, 1, "1!=1")
 
 
