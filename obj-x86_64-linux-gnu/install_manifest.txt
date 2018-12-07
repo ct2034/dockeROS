@@ -1,0 +1,5 @@
+/opt/ros/kinetic/lib/pkgconfig/dockeros.pc
+/opt/ros/kinetic/share/dockeros/cmake/dockerosConfig.cmake
+/opt/ros/kinetic/share/dockeros/cmake/dockerosConfig-version.cmake
+/opt/ros/kinetic/share/dockeros/package.xml
+/opt/ros/kinetic/etc/catkin/profile.d/dockeROS.bash
