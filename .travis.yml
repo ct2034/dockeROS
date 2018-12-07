@@ -1,7 +1,18 @@
 sudo: required
+dist: trusty
 language: minimal
 services:
   - docker
 
-before_install:
-  - docker pull ros:kinetic
+env:
+  global:
+    - ROS_REPO=ros
+    - ADDITIONAL_DEBS=clang
+  matrix:
+    - ROS_DISTRO="indigo"
+    - ROS_DISTRO="kinetic"
+    - ROS_DISTRO="melodic"
+install:
+  - git clone https://github.com/ros-industrial/industrial_ci.git .ci_config
+script:
+  - .ci_config/travis.sh
