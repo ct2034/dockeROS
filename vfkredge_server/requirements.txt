@@ -1,5 +1,0 @@
-falcon
-falcon-cors
-falcon-multipart
-gunicorn
-pymongo
