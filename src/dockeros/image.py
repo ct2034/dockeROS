@@ -81,7 +81,6 @@ class DockeROSImage():
                 logging.info('This is a system package to be installed from:\n> ' + self.deb_package)
                 self.user_package = False
             else:
-                self.check_pkg_dep()
                 logging.info('This is a user package at:\n> ' + self.path)
                 self.user_package = True
 
@@ -90,14 +89,15 @@ class DockeROSImage():
         if dockerfile: # defined by cli
             self.dockerfile = dockerfile
         elif self.path: # in package folder
-            for f in os.walk(self.path):
-                fname = f[0]
-                if re.match(r"\/.*Dockerfile.*", fname):
-                    self.dockerfile = fname
-                    logging.info('This package has a Dockerfile at:\n> ' + self.dockerfile)
-                    break
+            for fs in os.walk(self.path):
+                for f in fs[2]:
+                    fname = fs[0] + "/" + f
+                    if re.match(r".*Dockerfile.*", f):
+                        self.dockerfile = fname
+                        logging.info('This package has a Dockerfile at:\n> ' + self.dockerfile)
+                        break
         if not self.dockerfile:
-            logging.info('This package does not have a Dockerfile\n> ')
+            logging.info('This package does not have a Dockerfile')
             if self.user_package:
                 self.dockerfile = self.dockeros_path + '/config/source_Dockerfile'
                 logging.info('Using source Dockerfile:\n> ' + self.dockerfile)
@@ -128,17 +128,6 @@ class DockeROSImage():
             shell=True)
         logging.debug(out)
         self.deb_package = out.split("\n")[1].strip()
-
-    def check_pkg_dep(self):
-        """
-        Checking system dependencies required by User packages
-        """
-#        out = subprocess.check_output(
-#            " ".join(
-#                ["rosdep", "resolve", self.rospackage]),
-#            shell=True)
-#        logging.debug(out)
-#        self.deb_package = out.split("\n")[1].strip()
 
     def build(self):
         """
