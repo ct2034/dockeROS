@@ -81,6 +81,7 @@ class DockeROSImage():
                 logging.info('This is a system package to be installed from:\n> ' + self.deb_package)
                 self.user_package = False
             else:
+                self.check_pkg_dep()
                 logging.info('This is a user package at:\n> ' + self.path)
                 self.user_package = True
 
@@ -94,11 +95,14 @@ class DockeROSImage():
                     logging.info('This package has a Dockerfile at:\n> ' + self.dockerfile)
                     break
         if not self.dockerfile:
+            logging.info('This package does not have a Dockerfile\n> ')
             if self.user_package:
-                self.dockerfile = self.dockeros_path + '/config/source_Dockerfile'
+                #self.dockerfile = self.dockeros_path + '/config/source_Dockerfile'
+                self.dockerfile = self.dockeros_path + '/config/custom_Dockerfile'
+                logging.info('Using custom Dockerfile:\n> ' + self.dockerfile)
             else:  # system package
                 self.dockerfile = self.dockeros_path + '/config/default_Dockerfile'
-            logging.info('Using default Dockerfile:\n> ' + self.dockerfile)
+                logging.info('Using default Dockerfile:\n> ' + self.dockerfile)
 
         # What is the image name going to be?
         if "registry" in config.keys():
@@ -123,6 +127,17 @@ class DockeROSImage():
             shell=True)
         logging.debug(out)
         self.deb_package = out.split("\n")[1].strip()
+
+    def check_pkg_dep(self):
+        """
+        Checking system dependencies required by User packages
+        """
+#        out = subprocess.check_output(
+#            " ".join(
+#                ["rosdep", "resolve", self.rospackage]),
+#            shell=True)
+#        logging.debug(out)
+#        self.deb_package = out.split("\n")[1].strip()
 
     def build(self):
         """
