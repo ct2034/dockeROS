@@ -20,7 +20,7 @@ Forthcoming
 * Merge branch 'master' of github.com:ct2034/dockeros
 * docker in docker.. is this a good idea?
 * Documentation
-* dont need ros_master_uri
+* dont need rosmasteruri
 * maybe you have no config
 * Merge branch 'master' of https://github.com/ct2034/dockeros
   Merging some changes
@@ -36,7 +36,7 @@ Forthcoming
 * running ros comunication
 * less presumptuous naming
 * tab completion
-* no need for debug_eval_print
+* no need for debugevalprint
 * handling the temporary dockerfile correctly
 * almost working
 * testing (with nosetest)
@@ -112,7 +112,7 @@ Forthcoming
 * archi
 * output
 * get back ip address and store in a mongodb database
-* remove rest_py.py
+* remove restpy.py
 * server + client + mongodb
 * first script for REST api for server client communication
 * some output
