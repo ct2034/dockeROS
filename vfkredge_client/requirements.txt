@@ -3,3 +3,4 @@ falcon-cors
 falcon-multipart
 gunicorn
 pymongo
+psutil
