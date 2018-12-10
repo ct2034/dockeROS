@@ -4,9 +4,10 @@ import sys
 import image
 import logging
 import yaml
+import os
 import rospkg
 
-logging.getLogger().setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.DEBUG)
 
 def ip_validator(input):
     ip_and_port = input.split(":")
@@ -32,7 +33,7 @@ g.add_argument("-e", "--env", action='store_true', default=True,
 g.add_argument("-i", "--ip", "--host", nargs=1, type=ip_validator, metavar='HOST:PORT',
     help="set the host (robot) to deploy image to")
 
-parser.add_argument("-f", "--dockerfile", nargs=1, type=open,
+parser.add_argument("-f", "--dockerfile", nargs=1, type=open, default=None,
     help="use a custom Dockerfile")
 parser.add_argument("-n","--no-build", action='store_true',
     help="dont (re-)build the image before running")
@@ -40,7 +41,14 @@ parser.add_argument("-n","--no-build", action='store_true',
 parser.add_argument("roscommand", nargs=argparse.REMAINDER,
     help="Everything after the subcommand will be interpreted as the ros command to be run in your image")
 
+
 args = parser.parse_args()
+if args.dockerfile:
+    dockerfname = os.path.realpath(args.dockerfile[0].name)
+    args.dockerfile[0].close()
+    logging.debug(dockerfname)
+else:
+    dockerfname = False
 logging.debug(args)
 
 rp = rospkg.RosPack()
@@ -51,7 +59,8 @@ except Exception as e:
     logging.warn("No config file found under " + fname)
     config = {}
 dock_obj = image.DockeROSImage(args.roscommand,
-                               config=config)
+                               config=config,
+                               dockerfile=dockerfname)
 if args.env:
     dock_obj.make_client()
 else:
