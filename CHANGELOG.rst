@@ -2,8 +2,8 @@
 Changelog for package dockeros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.1 (2018-12-10)
+------------------
 
 * requirements
 * best practise: Comment out what you might never nedd
