@@ -1,7 +1,7 @@
 # docke*ROS*
 Simply running ros nodes in docker containers on remote robots.
 
-![tavis_status](https://travis-ci.org/ct2034/dockeROS.svg?branch=master)
+[![tavis_status](https://travis-ci.org/ct2034/dockeROS.svg?branch=master)](https://travis-ci.org/ct2034/dockeROS)
 
 ## Idea
 This is supposed to deliver tools to use the methods of **edge computing** for ROS enabled robots.
