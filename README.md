@@ -1,7 +1,11 @@
 # docke*ROS*
 Simply running ros nodes in docker containers on remote robots.
 
-[![tavis_status](https://travis-ci.org/ct2034/dockeROS.svg?branch=master)](https://travis-ci.org/ct2034/dockeROS)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/ct2034/dockeROS/compare)
+t: [![tavis_status](https://travis-ci.org/ct2034/dockeROS.svg?branch=master)](https://travis-ci.org/ct2034/dockeROS)
+bf: [![Build Status](http://build.ros.org/job/Kbin_uxv8_uXv8__dockeros__ubuntu_xenial_arm64__binary/badge/icon)](http://build.ros.org/job/Kbin_uxv8_uXv8__dockeros__ubuntu_xenial_arm64__binary/)
+bf_doc: [![Build Status](http://build.ros.org/buildStatus/icon?job=Kdoc__dockeros__ubuntu_xenial_amd64)](http://build.ros.org/job/Kdoc__dockeros__ubuntu_xenial_amd64/)
+cc: [![Maintainability](https://api.codeclimate.com/v1/badges/23f9444fa2a2a1dc3d8c/maintainability)](https://codeclimate.com/github/ct2034/dockeROS/maintainability)
 
 ## Idea
 This is supposed to deliver tools to use the methods of **edge computing** for ROS enabled robots.
