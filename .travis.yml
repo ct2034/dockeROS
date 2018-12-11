@@ -29,10 +29,10 @@ before_install:
 install:
   - rosdep install -v --from-paths .
   - source /opt/ros/$ROS_DISTRO/setup.bash
-  - mkdir -p ~/ws/src
+  - mkdir -p ~/ws/src/dockeros
   - cd ~/ws/src
   - catkin_init_workspace
-  - cp /home/travis/build/ct2034/dockeROS ~/ws/src
+  - cp -r /home/travis/build/ct2034/dockeROS/* ~/ws/src/dockeros
   - cd ~/ws
 
 script:
