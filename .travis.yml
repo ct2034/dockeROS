@@ -7,6 +7,7 @@ services:
 env:
   global:
     - ROS_REPO=ros
+    - ADDITIONAL_DEBS=python-docker
   matrix:
     - ROS_DISTRO="indigo"
     - ROS_DISTRO="kinetic"
