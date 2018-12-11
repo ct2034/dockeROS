@@ -7,7 +7,7 @@ import yaml
 import os
 import rospkg
 
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.INFO)
 
 def ip_validator(input):
     ip_and_port = input.split(":")

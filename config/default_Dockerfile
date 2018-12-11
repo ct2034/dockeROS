@@ -8,4 +8,6 @@ RUN n=$(dpkg-query -W #####DEB_PACKAGE##### | grep -cv "no packages found"); \
 
 RUN sed -i "6iexport ROS_IP=\$\(hostname -I\)" /ros_entrypoint.sh
 
+RUN rm -rf /var/lib/apt/lists/*
+
 CMD #####CMD#####

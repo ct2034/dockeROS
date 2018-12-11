@@ -106,7 +106,9 @@ class DockeROSImage():
             self.registry_string = config['registry'] + '/'
         else:
             self.registry_string = ""
-        self.name = "_".join(self.roscommand).replace('.', '-')
+        for s in roscommand:
+            assert not "__" in s, "Double underscores lead to ambigous image names"
+        self.name = "__".join(self.roscommand).replace('.', '-').replace('~', '-').replace('=', '-')
         self.tag = self.registry_string + self.name
         logging.info("name: \n> " + self.name)
         logging.info("tag: \n> " + self.tag)
@@ -125,20 +127,11 @@ class DockeROSImage():
         logging.debug(out)
         self.deb_package = out.split("\n")[1].strip()
 
-    def build(self):
-        """
-        Compiles a baseDocker image with specific image of a rospackage
-        """
-        in_fname = self.dockerfile
-        dockerfile = None
-        if self.user_package:
-            self.deb_package = ""
-            path = self.path
-            dockerfile_fname = self.path + "/Dockerfile"
-        else: # system package
-            assert self.deb_package, "Debian package needs to be available"
-            path = None
-            dockerfile_fname = '/tmp/tmp_Dockerfile'
+    def replaceDockerfile(self, in_fname, dockerfile_fname):
+        if os.path.exists(dockerfile_fname):
+            if os.path.samefile(in_fname, dockerfile_fname):
+                logging.warning("Using Dockerfile without replacing (%s)"%dockerfile_fname)
+                return
 
         with open(in_fname, 'r') as in_file:
             with open(dockerfile_fname, 'w+') as out_file:
@@ -160,6 +153,23 @@ class DockeROSImage():
                     print l.strip()
                 print "#############################################################"
                 dockerfile.close()
+
+    def build(self):
+        """
+        Compiles a baseDocker image with specific image of a rospackage
+        """
+        in_fname = self.dockerfile
+        dockerfile = None
+        if self.user_package:
+            self.deb_package = ""
+            path = self.path
+            dockerfile_fname = self.path + "/Dockerfile"
+        else: # system package
+            assert self.deb_package, "Debian package needs to be available"
+            path = None
+            dockerfile_fname = '/tmp/tmp_Dockerfile'
+
+        self.replaceDockerfile(in_fname, dockerfile_fname)
 
         logging.info("Please wait while the image is being built\n (This may take a while ...)")
         with open(dockerfile_fname, 'r') as dockerfile:
