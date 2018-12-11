@@ -50,6 +50,11 @@ optional arguments:
   -n, --no-build        dont (re-)build the image before running
 ```
 
+## Contribution
+All contributions are welcome. Especially important is at the moment:
+### Testing
+Please open issues for all problems you encounter. Please make sure, that your problem is reproducible though: Add the rosdistro, package, exact command and Dockerfile (if applicable) that you are using
+
 ## Troubleshooting
 ### Registry with http
 When you get this error: `{"errorDetail":{"message":"Get https://YOUR_REGISTRY:5000/v2/: http: server gave HTTP response to HTTPS client"},"error":"Get https://YOUR_REGISTRY:5000/v2/: http: server gave HTTP response to HTTPS client"}` while trying to push:
