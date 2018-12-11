@@ -28,3 +28,12 @@ before_install:
 
 install:
   - rosdep install -v --from-paths .
+  - source /opt/ros/$ROS_DISTRO/setup.bash
+  - mkdir -p /ws/src
+  - cd /ws/src
+  - catkin_init_workspace
+  - cp ct2034/dockeros /ws/src
+  - cd /ws
+
+script:
+  - catkin run_tests
