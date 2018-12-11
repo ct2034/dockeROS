@@ -1,8 +1,0 @@
-prefix=/opt/ros/kinetic
-
-Name: dockeros
-Description: Description of dockeros
-Version: 1.0.0
-Cflags: 
-Libs: -L/opt/ros/kinetic/lib 
-Requires: 

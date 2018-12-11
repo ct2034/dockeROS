@@ -1,6 +1,0 @@
-338c2ba0d73b4c4767979d85d6e309f6  opt/ros/kinetic/etc/catkin/profile.d/dockeROS.bash
-fa4d1f9a28d0d4657f2bb0d454b48c12  opt/ros/kinetic/lib/pkgconfig/dockeros.pc
-f90af7ea98ad6bd094525fc5117d8364  opt/ros/kinetic/share/dockeros/cmake/dockerosConfig-version.cmake
-ccd92650f4e5b58c971f211176429e81  opt/ros/kinetic/share/dockeros/cmake/dockerosConfig.cmake
-5a45279ebe8aafeceb1a7fac9f0f2bcb  opt/ros/kinetic/share/dockeros/package.xml
-5d0ac542870c7a211299b55332668368  usr/share/doc/ros-kinetic-dockeros/changelog.Debian.gz

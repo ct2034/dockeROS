@@ -1,9 +1,0 @@
-Package: ros-kinetic-dockeros
-Version: 1.0.0-0xenial
-Architecture: amd64
-Maintainer: ct2034 <christian.henkel@ipa.fraunhofer.de>
-Installed-Size: 31
-Depends: ros-kinetic-rospy
-Section: misc
-Priority: extra
-Description: Simply running ros nodes in docker containers on remote robots.
