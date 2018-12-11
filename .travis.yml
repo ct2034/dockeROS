@@ -32,7 +32,7 @@ install:
   - mkdir -p ~/ws/src
   - cd ~/ws/src
   - catkin_init_workspace
-  - cp ct2034/dockeros ~/ws/src
+  - cp /home/travis/build/ct2034/dockeROS ~/ws/src
   - cd ~/ws
 
 script:
