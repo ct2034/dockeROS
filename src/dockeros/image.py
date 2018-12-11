@@ -154,6 +154,11 @@ class DockeROSImage():
                 print "#############################################################"
                 dockerfile.close()
 
+    def logIt(self, logging_fun, it):
+        for l in it:
+            logging_fun('| '+(l['stream'].strip() if ('stream' in l.keys()) else ''))
+
+
     def build(self):
         """
         Compiles a baseDocker image with specific image of a rospackage
@@ -181,14 +186,11 @@ class DockeROSImage():
                     custom_context=False,
                     fileobj=(None if self.user_package else dockerfile)
                     )
-                for l in it:
-                    logging.debug('| '+(l['stream'].strip() if ('stream' in l.keys()) else ''))
+                self.logIt(logging.debug, it)
                 logging.info("Image was created. Tags are: " + ', '.join(self.image.tags))
             except docker.errors.BuildError as e:
                 logging.error(e)
-                for l in it:
-                    logging.error('| '+(l['stream'].strip() if ('stream' in l.keys()) else ''))
-
+                self.logIt(logging.error, it)
 
     def run(self):
         """
