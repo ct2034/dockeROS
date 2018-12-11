@@ -29,6 +29,7 @@ before_install:
 install:
   - rosdep install -v --from-paths .
   - source /opt/ros/$ROS_DISTRO/setup.bash
+  - export PYTHONPATH=$PYTHONPATH:/usr/lib/python2.7/dist-packages
   - mkdir -p ~/ws/src/dockeros
   - cd ~/ws/src
   - catkin_init_workspace
