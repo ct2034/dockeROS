@@ -28,6 +28,7 @@ before_install:
 
 install:
   - rosdep install -v --from-paths .
+  - sudo apt install --reinstall python-catkin-pkg
   - source /opt/ros/$ROS_DISTRO/setup.bash
   - mkdir -p ~/ws/src/dockeros
   - cd ~/ws/src
