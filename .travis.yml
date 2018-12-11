@@ -5,9 +5,6 @@ services:
   - docker
 
 env:
-  global:
-    - ROS_REPO=ros
-    - ADDITIONAL_DEBS=python-docker
   matrix:
     - ROS_DISTRO="indigo"
     - ROS_DISTRO="kinetic"
@@ -16,7 +13,14 @@ matrix:
   allow_failures:
     - env: ROS_DISTRO="indigo"
     - env: ROS_DISTRO="melodic"
+
+before_install:
+  - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+  - sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+  - sudo apt update
+  - sudo apt install ros-$ROS_DISTRO-ros-core
+  - rosdep update
+  - rosdep install -v --from-paths .
+
 install:
   - git clone https://github.com/ros-industrial/industrial_ci.git .ci_config
-script:
-  - .ci_config/travis.sh
