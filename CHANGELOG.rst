@@ -2,6 +2,16 @@
 Changelog for package dockeros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* this is almost binary
+* jou
+* refactoring
+* finding user defined Dockerfile
+* curiousity
+* now with rosdep :)
+* Contributors: ct2034
+
 1.0.1 (2018-12-10)
 ------------------
 
