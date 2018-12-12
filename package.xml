@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>dockeros</name>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
   <description>Simply running ros nodes in docker containers on remote robots.</description>
 
   <maintainer email="post@henkelchristian.de">Christian Henkel</maintainer>

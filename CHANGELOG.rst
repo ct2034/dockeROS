@@ -2,8 +2,8 @@
 Changelog for package dockeros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.3 (2018-12-12)
+------------------
 * removing rospy from CMakeLists
 * documentation
 * Contributors: Christian Henkel, ct2034
