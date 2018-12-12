@@ -54,7 +54,7 @@ optional arguments:
   -n, --no-build        dont (re-)build the image before running
 ```
 
-![screencast of dockeros run](docs/dockeros_run.gif)
+![screencast of dockeros run](https://github.com/ct2034/dockeROS/blob/master/doc/dockeros_run.gif)
 
 ## Contribution
 All contributions are welcome. Especially important is at the moment:
