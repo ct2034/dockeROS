@@ -1,9 +1,5 @@
 sudo: required
 
-dist:
-  - precise
-  - trusty
-  - xenial
 language: python
 python:
   - "2.7"
@@ -20,6 +16,13 @@ matrix:
   allow_failures:
     - env: ROS_DISTRO="indigo"
     - env: ROS_DISTRO="melodic"
+  include:
+    - os: linux
+      dist: precise
+    - os: linux
+      dist: trusty
+    - os: linux
+      dist: xenial
 
 before_install:
   - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
