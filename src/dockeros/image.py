@@ -82,9 +82,11 @@ class DockeROSImage():
 
         # What Dockerfile should be used?
         self.dockerfile = None
-        if dockerfile: # defined by cli
+        
+        if dockerfile: # DOCKERFILE defined by user
             self.dockerfile = dockerfile
-        elif self.path: # in package folder
+            logging.info('Dockerfile given by user: ' + self.dockerfile)
+        elif self.path: # DOCKERFILE in package folder 
             for fs in os.walk(self.path):
                 for f in fs[2]:
                     fname = fs[0] + "/" + f
@@ -92,7 +94,7 @@ class DockeROSImage():
                         self.dockerfile = fname
                         logging.info('This package has a Dockerfile at:\n> ' + self.dockerfile)
                         break
-        if not self.dockerfile:
+        if not self.dockerfile: #NO DOCKERFILE
             logging.info('This package does not have a Dockerfile')
             if self.user_package:
                 self.dockerfile = self.dockeros_path + '/config/source_Dockerfile'
@@ -168,7 +170,9 @@ class DockeROSImage():
         if self.user_package:
             self.deb_package = ""
             path = self.path
+            logging.info(" path is " + path)
             dockerfile_fname = self.path + "/Dockerfile"
+            logging.info(" Dockerfile is at " + dockerfile_fname)
         else: # system package
             assert self.deb_package, "Debian package needs to be available"
             path = None

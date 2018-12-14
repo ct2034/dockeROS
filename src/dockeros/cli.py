@@ -30,11 +30,13 @@ push: Push image to predefined registry\n")
 g = parser.add_mutually_exclusive_group()
 g.add_argument("-e", "--env", action='store_true', default=True,
     help="use the existing docker environment (see https://dockr.ly/2zMPc17 for details)")
+
 g.add_argument("-i", "--ip", "--host", nargs=1, type=ip_validator, metavar='HOST:PORT',
     help="set the host (robot) to deploy image to")
 
-parser.add_argument("-f", "--dockerfile", nargs=1, type=open, default=None,
+parser.add_argument("-f", "--dockerfile", dest="dockerfile", nargs=1, type=open, default=None,
     help="use a custom Dockerfile")
+
 parser.add_argument("-n","--no-build", action='store_true',
     help="dont (re-)build the image before running")
 
@@ -43,9 +45,10 @@ parser.add_argument("roscommand", nargs=argparse.REMAINDER,
 
 
 args = parser.parse_args()
+logging.info("parsing ")
+
 if args.dockerfile:
     dockerfname = os.path.realpath(args.dockerfile[0].name)
-    args.dockerfile[0].close()
     logging.debug(dockerfname)
 else:
     dockerfname = False
