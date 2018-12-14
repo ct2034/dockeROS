@@ -1,5 +1,8 @@
 sudo: required
-dist: trusty
+dist:
+  - precise
+  - trusty
+  - xenial
 language: minimal
 services:
   - docker
