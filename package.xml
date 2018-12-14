@@ -1,18 +1,16 @@
 <?xml version="1.0"?>
 <package>
   <name>dockeros</name>
-  <version>1.0.0</version>
+  <version>1.0.3</version>
   <description>Simply running ros nodes in docker containers on remote robots.</description>
 
-  <maintainer email="post@henkelchristian.de">ct2034</maintainer>
+  <maintainer email="post@henkelchristian.de">Christian Henkel</maintainer>
 
   <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>rospy</build_depend>
-  <!-- <build_depend>python-docker-pip</build_depend> -->
-  <run_depend>rospy</run_depend>
-  <!-- <run_depend>python-docker-pip</run_depend> -->
+  <build_depend>python-docker</build_depend>
+  <run_depend>python-docker</run_depend>
   <test_depend>rostest</test_depend>
 
   <export>

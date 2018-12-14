@@ -1,16 +1,13 @@
 sudo: required
-dist:
-  - precise
-  - trusty
-  - xenial
-language: minimal
+
+language: python
+python:
+  - "2.7"
+cache: pip
 services:
   - docker
 
 env:
-  global:
-    - ROS_REPO=ros
-    - ADDITIONAL_DEBS=python-docker
   matrix:
     - ROS_DISTRO="indigo"
     - ROS_DISTRO="kinetic"
@@ -19,7 +16,25 @@ matrix:
   allow_failures:
     - env: ROS_DISTRO="indigo"
     - env: ROS_DISTRO="melodic"
+
+before_install:
+  - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+  - sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+  - sudo apt update
+  - sudo pip install -U rosdep catkin_tools catkin_pkg
+  - sudo rosdep init
+  - sudo sh -c 'echo "yaml https://raw.githubusercontent.com/ct2034/rosdistro/master/rosdep/python.yaml" > /etc/ros/rosdep/sources.list.d/30-docker-py.list'
+  - rosdep update
+
 install:
-  - git clone https://github.com/ros-industrial/industrial_ci.git .ci_config
+  - rosdep install -v --from-paths .
+  - source /opt/ros/$ROS_DISTRO/setup.bash
+  - export PYTHONPATH=$PYTHONPATH:/usr/lib/python2.7/dist-packages
+  - mkdir -p ~/ws/src/dockeros
+  - cd ~/ws/src
+  - catkin_init_workspace
+  - cp -r /home/travis/build/ct2034/dockeROS/* ~/ws/src/dockeros
+  - cd ~/ws
+
 script:
-  - .ci_config/travis.sh
+  - catkin run_tests

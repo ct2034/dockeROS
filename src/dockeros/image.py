@@ -10,12 +10,8 @@ import sys
 logging.getLogger("docker").setLevel(logging.INFO)
 logging.getLogger("urllib3").setLevel(logging.INFO)
 if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
-    def debug_eval_print(a):
-        print(a)
     DEBUG = True
 else:
-    def debug_eval_print(_):
-        pass
     DEBUG = False
 
 
@@ -36,7 +32,7 @@ class DockeROSImage():
             >>> obj.run()
     """
 
-    def __init__(self, roscommand, config):
+    def __init__(self, roscommand, config, dockerfile=None):
         """
             Initilizes the commands with the rospkg configuration and roscommands allowed in this context
             Args:
@@ -71,11 +67,11 @@ class DockeROSImage():
             try:
                 self.check_rosdep()
                 logging.info('This is a system package to be installed from:\n> ' + self.deb_package)
-                self.user_package = False
             except:
-                raise e
+                logging.info('Can not find package: ' + self.rospackage)
+            self.user_package = False
 
-        if self.path: # on systemS
+        if self.path: # on system
             if self.path.startswith('/opt/ros'):
                 self.check_rosdep()
                 logging.info('This is a system package to be installed from:\n> ' + self.deb_package)
@@ -86,26 +82,35 @@ class DockeROSImage():
 
         # What Dockerfile should be used?
         self.dockerfile = None
-        if self.path:
-            for f in os.walk(self.path):
-                fname = f[0]
-                if re.match(r"\/.*Dockerfile.*", fname):
-                    self.dockerfile = fname
-                    logging.info('This package has a Dockerfile at:\n> ' + self.dockerfile)
-                    break
-        if not self.dockerfile:
+        
+        if dockerfile: # DOCKERFILE defined by user
+            self.dockerfile = dockerfile
+            logging.info('Dockerfile given by user: ' + self.dockerfile)
+        elif self.path: # DOCKERFILE in package folder 
+            for fs in os.walk(self.path):
+                for f in fs[2]:
+                    fname = fs[0] + "/" + f
+                    if re.match(r".*Dockerfile.*", f):
+                        self.dockerfile = fname
+                        logging.info('This package has a Dockerfile at:\n> ' + self.dockerfile)
+                        break
+        if not self.dockerfile: #NO DOCKERFILE
+            logging.info('This package does not have a Dockerfile')
             if self.user_package:
                 self.dockerfile = self.dockeros_path + '/config/source_Dockerfile'
+                logging.info('Using source Dockerfile:\n> ' + self.dockerfile)
             else:  # system package
                 self.dockerfile = self.dockeros_path + '/config/default_Dockerfile'
-            logging.info('Using default Dockerfile:\n> ' + self.dockerfile)
+                logging.info('Using default Dockerfile:\n> ' + self.dockerfile)
 
         # What is the image name going to be?
         if "registry" in config.keys():
             self.registry_string = config['registry'] + '/'
         else:
             self.registry_string = ""
-        self.name = "_".join(self.roscommand).replace('.', '-')
+        for s in roscommand:
+            assert not "__" in s, "Double underscores lead to ambigous image names"
+        self.name = "__".join(self.roscommand).replace('.', '-').replace('~', '-').replace('=', '-')
         self.tag = self.registry_string + self.name
         logging.info("name: \n> " + self.name)
         logging.info("tag: \n> " + self.tag)
@@ -124,63 +129,72 @@ class DockeROSImage():
         logging.debug(out)
         self.deb_package = out.split("\n")[1].strip()
 
+    def replaceDockerfile(self, in_fname, dockerfile_fname):
+        if os.path.exists(dockerfile_fname):
+            if os.path.samefile(in_fname, dockerfile_fname):
+                logging.warning("Using Dockerfile without replacing (%s)"%dockerfile_fname)
+                return
+
+        with open(in_fname, 'r') as in_file:
+            with open(dockerfile_fname, 'w+') as out_file:
+                out_file.truncate()
+                for l in in_file:
+                    l = l.replace("#####DEB_PACKAGE#####", self.deb_package)
+                    l = l.replace("#####ROS_PACKAGE#####", self.rospackage)
+                    l = l.replace("#####CMD#####", "[\""+"\", \"".join(
+                        ["/ros_entrypoint.sh"] + self.roscommand
+                    )+"\"]" )
+                    out_file.write(l)
+                out_file.close()
+            in_file.close()
+
+        if DEBUG:
+            with open(dockerfile_fname, 'r') as dockerfile:
+                print "Dockerfile used: ############################################"
+                for l in dockerfile:
+                    print l.strip()
+                print "#############################################################"
+                dockerfile.close()
+
+    def logIt(self, logging_fun, it):
+        for l in it:
+            logging_fun('| '+(l['stream'].strip() if ('stream' in l.keys()) else ''))
+
+
     def build(self):
         """
         Compiles a baseDocker image with specific image of a rospackage
         """
-        TMP_DF_PATH = '/tmp/tmp_Dockerfile'
+        in_fname = self.dockerfile
+        dockerfile = None
         if self.user_package:
-            try:
-                in_file = open(self.dockerfile, 'r')
-                it = self.docker_client.images.build(path=self.path,
-                               tag=self.name + ":" + self.tag,
-                               dockerfile=self.dockerfile,
-                               buildargs={
-                                   "PACKAGE": self.rospackage
-                               },
-                               labels={
-                                   "label_a": "1",
-                                   "label_b": "2"
-                               }
-                               )
-                for l in it:
-                    ld = eval(l)
-                    if ld.__class__ == dict and "stream" in ld.keys():
-                        logging.info(ld["stream"].strip())
-            except Exception  as e:
-                logging.error("Exception during building:" + str(e))
-            finally:
-                in_file.close()
-        else:
+            self.deb_package = ""
+            path = self.path
+            logging.info(" path is " + path)
+            dockerfile_fname = self.path + "/Dockerfile"
+            logging.info(" Dockerfile is at " + dockerfile_fname)
+        else: # system package
             assert self.deb_package, "Debian package needs to be available"
-            if True:
-                with open(self.dockerfile, 'r') as in_file:
-                    with open(TMP_DF_PATH, 'w+') as out_file:
-                        out_file.truncate()
-                        for l in in_file:
-                            l = l.replace("#####DEB_PACKAGE#####", self.deb_package)
-                            l = l.replace("#####CMD#####", "[\""+"\", \"".join(
-                                ["/ros_entrypoint.sh"] + self.roscommand
-                            )+"\"]" )
-                            out_file.write(l)
-                        out_file.close()
+            path = None
+            dockerfile_fname = '/tmp/tmp_Dockerfile'
 
-                if DEBUG:
-                    with open(TMP_DF_PATH, 'r') as dockerfile:
-                        print "Dockerfile used: ############################################"
-                        for l in dockerfile:
-                            print l.strip()
-                        print "#############################################################"
+        self.replaceDockerfile(in_fname, dockerfile_fname)
 
-                with open(TMP_DF_PATH, 'r') as dockerfile:
-                    self.image, it = self.docker_client.images.build(
-                        fileobj=dockerfile,
-                        custom_context=False,
-                        tag=self.tag
-                        )
-                    for l in it:
-                        print('| '+(l['stream'].strip() if ('stream' in l.keys()) else ''))
-                    logging.info("Image was created. Tags are: " + ', '.join(self.image.tags))
+        logging.info("Please wait while the image is being built\n (This may take a while ...)")
+        with open(dockerfile_fname, 'r') as dockerfile:
+            it = []
+            try:
+                self.image, it = self.docker_client.images.build(
+                    path=path,
+                    tag=self.tag,
+                    custom_context=False,
+                    fileobj=(None if self.user_package else dockerfile)
+                    )
+                self.logIt(logging.debug, it)
+                logging.info("Image was created. Tags are: " + ', '.join(self.image.tags))
+            except docker.errors.BuildError as e:
+                logging.error(e)
+                self.logIt(logging.error, it)
 
     def run(self):
         """
