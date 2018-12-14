@@ -7,11 +7,6 @@ cache: pip
 services:
   - docker
 
-env:
-  matrix:
-    - ROS_DISTRO="indigo"
-    - ROS_DISTRO="kinetic"
-    - ROS_DISTRO="melodic"
 matrix:
   allow_failures:
     - env: ROS_DISTRO="indigo"
@@ -19,10 +14,16 @@ matrix:
   include:
     - os: linux
       dist: precise
-    - os: linux
-      dist: trusty
+      env: ROS_DISTRO="indigo"
     - os: linux
       dist: xenial
+      env: ROS_DISTRO="kinetic"
+    - os: linux
+      dist: xenial
+      env: ROS_DISTRO="lunar"
+    # - os: linux
+    #   dist: bionic
+    #   env: ROS_DISTRO="melodic"
 
 before_install:
   - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
