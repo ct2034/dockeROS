@@ -8,9 +8,6 @@ services:
   - docker
 
 matrix:
-  allow_failures:
-    - env: ROS_DISTRO="indigo"
-    - env: ROS_DISTRO="melodic"
   include:
     - os: linux
       dist: trusty
