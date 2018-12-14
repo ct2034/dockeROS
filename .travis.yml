@@ -13,7 +13,7 @@ matrix:
     - env: ROS_DISTRO="melodic"
   include:
     - os: linux
-      dist: precise
+      dist: trusty
       env: ROS_DISTRO="indigo"
     - os: linux
       dist: xenial
