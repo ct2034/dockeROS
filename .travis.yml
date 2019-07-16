@@ -8,21 +8,13 @@ services:
   - docker
 
 matrix:
-  allow_failures:
-    - env: ROS_DISTRO="indigo"
   include:
-    - os: linux
-      dist: trusty
-      env: ROS_DISTRO="indigo"
     - os: linux
       dist: xenial
       env: ROS_DISTRO="kinetic"
     - os: linux
-      dist: xenial
-      env: ROS_DISTRO="lunar"
-    # - os: linux
-    #   dist: bionic
-    #   env: ROS_DISTRO="melodic"
+      dist: bionic
+      env: ROS_DISTRO="melodic"
 
 before_install:
   - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
