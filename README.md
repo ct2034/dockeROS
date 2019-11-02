@@ -1,5 +1,5 @@
 # docke*ROS*
-Simply running ros nodes in docker containers on remote robots.
+Simply running ROS nodes in docker containers on robots.
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/ct2034/dockeROS/compare)
 t: [![tavis_status](https://travis-ci.org/ct2034/dockeROS.svg?branch=master)](https://travis-ci.org/ct2034/dockeROS)
@@ -9,24 +9,26 @@ cc: [![Maintainability](https://api.codeclimate.com/v1/badges/23f9444fa2a2a1dc3d
 
 ## Idea
 This is supposed to deliver tools to use the methods of **edge computing** for ROS enabled robots.
-As of methods we currently mainly focus on a fast and seamless deployment of software to edge devices (i.e. robots, and others).
+These methods include fast and seamless deployment of software to edge devices (i.e. robots, and others).
 
 [![video](https://img.youtube.com/vi/Ubdc96GkO3M/1.jpg)](https://www.youtube.com/watch?v=Ubdc96GkO3M)
 
 The **dockeros library** is designed to create and update docker images for ros packages.
-There is a CLI to use these capabilities in your development lifecycle and plans to build a GUI that makes use of these tools in a client-server structure.
+There is a CLI to use these capabilities in your development lifecycle that makes use of these tools in a client-server structure.
 
 ## Prerequesits
 ### On your PC (the Server)
-The python packages required by the server can be installed via `sudo pip install -r requirements.txt`.
+The python packages required by the server can be installed via `pip install -r requirements.txt`.
 To install docker, you can use [this](https://docs.docker.com/engine/installation/linux/ubuntu/).
 
 #### Optional: Registry
-Without a registry, you will need to build the images on th robot, if, you want to run them there.
-You will also need to run a docker registry on your system: `docker run -d -p 5000:5000 --name registry registry`. You can also use the `unsafe_registry` in this repository. It will allow CORS (which is why I called it unsafe).
+Without a registry, you will need to build the images on the robot they should run on.
+If you want to build them in a central place (the server), you need to run a docker registry on that server: `docker run -d -p 5000:5000 --name registry registry`. 
+You can also use the `unsafe_registry` in this repository. 
+It will allow CORS (which is why it is called unsafe).
 
 ### On the Robot (Client)
-On the robot you need to have a [docker deamon](https://docs.docker.com/edge/engine/reference/commandline/dockerd/) running with an accesibly API.
+On the robot you need to have a [docker deamon](https://docs.docker.com/edge/engine/reference/commandline/dockerd/) running with an accesible API.
 To install docker, you can use [this](https://docs.docker.com/engine/installation/linux/ubuntu/).
 A good way to do this on systems running `systemd` is can be found [here](https://www.campalus.com/enable-remote-tcp-connections-to-docker-host-running-ubuntu-15-04/).
 We **strongly** recommend to use [TLS for your deamons socket](http://lnr.li/60LYw/)
@@ -61,7 +63,8 @@ optional arguments:
 ## Contribution
 All contributions are welcome. Especially important is at the moment:
 ### Testing
-Please open issues for all problems you encounter. Please make sure, that your problem is reproducible though: Add the rosdistro, package, exact command and Dockerfile (if applicable) that you are using
+Please open issues for all problems you encounter. 
+Please make sure, that your problem is reproducible though: Add the rosdistro, package, exact command and Dockerfile (if applicable) that you are using
 
 ## Troubleshooting
 ### Registry with http
