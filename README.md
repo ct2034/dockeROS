@@ -11,10 +11,19 @@ cc: [![Maintainability](https://api.codeclimate.com/v1/badges/23f9444fa2a2a1dc3d
 This is supposed to deliver tools to use the methods of **edge computing** for ROS enabled robots.
 These methods include fast and seamless deployment of software to edge devices (i.e. robots, and others).
 
-[![video](https://img.youtube.com/vi/Ubdc96GkO3M/1.jpg)](https://www.youtube.com/watch?v=Ubdc96GkO3M)
-
 The **dockeros library** is designed to create and update docker images for ros packages.
 There is a CLI to use these capabilities in your development lifecycle that makes use of these tools in a client-server structure.
+
+## Media
+### Video
+[![video](https://img.youtube.com/vi/Ubdc96GkO3M/1.jpg)](https://www.youtube.com/watch?v=Ubdc96GkO3M)
+
+*Presentation at ROS Industrial Conference 2018*
+
+### Podcast
+[![podcast](https://assets.libsyn.com/secure/content/29282579/?height=90&width=90)](https://www.theconstructsim.com/rdp-034-docker-ros-dockeros-christian-henkel/)
+
+*Podcast with Ricardo Tellez*
 
 ## Prerequesits
 ### On your PC (the Server)
