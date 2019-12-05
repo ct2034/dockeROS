@@ -2,8 +2,8 @@
 Changelog for package dockeros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.0 (2019-12-05)
+------------------
 * documentation
 * also on melodic
 * Contributors: Christian Henkel, ct2034, proffessor.x
