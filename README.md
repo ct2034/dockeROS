@@ -1,4 +1,14 @@
+| :warning: UNMAINTAINED |
+|:----------------------:|
+
+Sorry, this is no longer maintained.
+But there are many __great__ alternatives:
+- [rocker](https://github.com/osrf/rocker)
+- [docker-ros](https://github.com/ika-rwth-aachen/docker-ros)
+- [useful-defaults](https://discourse.ros.org/t/announcing-docker-run-docker-run-and-docker-exec-with-useful-defaults-for-robotics/32680)
+
 # docke*ROS*
+
 Simply running ROS nodes in docker containers on robots.
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/ct2034/dockeROS/compare)
@@ -8,6 +18,7 @@ bf_doc: [![Build Status](http://build.ros.org/buildStatus/icon?job=Kdoc__dockero
 cc: [![Maintainability](https://api.codeclimate.com/v1/badges/23f9444fa2a2a1dc3d8c/maintainability)](https://codeclimate.com/github/ct2034/dockeROS/maintainability)
 
 ## Idea
+
 This is supposed to deliver tools to use the methods of **edge computing** for ROS enabled robots.
 These methods include fast and seamless deployment of software to edge devices (i.e. robots, and others).
 
@@ -15,34 +26,42 @@ The **dockeros library** is designed to create and update docker images for ros 
 There is a CLI to use these capabilities in your development lifecycle that makes use of these tools in a client-server structure.
 
 ## Media
+
 ### Video
+
 [![video](https://img.youtube.com/vi/Ubdc96GkO3M/1.jpg)](https://www.youtube.com/watch?v=Ubdc96GkO3M)
 
 *Presentation at ROS Industrial Conference 2018*
 
 ### Podcast
+
 [![podcast](https://assets.libsyn.com/secure/content/29282579/?height=90&width=90)](https://www.theconstructsim.com/rdp-034-docker-ros-dockeros-christian-henkel/)
 
 *Podcast with Ricardo Tellez*
 
 ## Prerequesits
+
 ### On your PC (the Server)
+
 The python packages required by the server can be installed via `pip install -r requirements.txt`.
 To install docker, you can use [this](https://docs.docker.com/engine/installation/linux/ubuntu/).
 
 #### Optional: Registry
+
 Without a registry, you will need to build the images on the robot they should run on.
 If you want to build them in a central place (the server), you need to run a docker registry on that server: `docker run -d -p 5000:5000 --name registry registry`. 
 You can also use the `unsafe_registry` in this repository. 
 It will allow CORS (which is why it is called unsafe).
 
 ### On the Robot (Client)
+
 On the robot you need to have a [docker deamon](https://docs.docker.com/edge/engine/reference/commandline/dockerd/) running with an accesible API.
 To install docker, you can use [this](https://docs.docker.com/engine/installation/linux/ubuntu/).
 A good way to do this on systems running `systemd` is can be found [here](https://www.campalus.com/enable-remote-tcp-connections-to-docker-host-running-ubuntu-15-04/).
 We **strongly** recommend to use [TLS for your deamons socket](http://lnr.li/60LYw/)
 
 ## The CLI
+
 ```
 usage: dockeros [-h] [-e | -i HOST:PORT] [-f DOCKERFILE] [-n]
                 {build,run,stop,push} ...
